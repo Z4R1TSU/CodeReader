@@ -29,5 +29,9 @@
             <add-to-group group-id="EditorActions" anchor="after" relative-to-action="EditorPageDown"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt meta RIGHT"/>
         </action>
+                <action id="CodeReader.ToggleVisibility" class="com.z4r1tsu.codereader.actions.ToggleVisibilityAction" text="Toggle CodeReader Visibility"
+                description="Shows or hides the CodeReader status bar widget.">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt meta H"/>
+        </action>
     </actions>
 </idea-plugin>
