@@ -1,15 +1,33 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>org.jetbrains.plugins.template</id>
-    <name>IntelliJ Platform Plugin Template</name>
-    <vendor>JetBrains</vendor>
+    <id>com.z4r1tsu.codereader</id>
+    <name>CodeReader</name>
+    <vendor>z4r1tsu</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
-
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="org.jetbrains.plugins.template.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="org.jetbrains.plugins.template.startup.MyProjectActivity" />
+        <statusBarWidgetFactory id="CodeReaderStatusBar" implementation="com.z4r1tsu.codereader.statusbar.CodeReaderStatusBarWidgetFactory" order="after MemoryIndicator"/>
     </extensions>
+
+    <actions>
+        <group id="CodeReader.Menu" text="CodeReader" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </group>
+        <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="Import from local txt file"
+                description="Select a txt file to read in the status bar.">
+            <add-to-group group-id="CodeReader.Menu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="control alt O"/>
+        </action>
+        <action id="CodeReader.PrevPage" class="com.z4r1tsu.codereader.actions.PrevPageAction" text="CodeReader Previous Page"
+                description="Go to the previous page.">
+            <add-to-group group-id="EditorActions" anchor="after" relative-to-action="EditorPageUp"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt meta LEFT"/>
+        </action>
+        <action id="CodeReader.NextPage" class="com.z4r1tsu.codereader.actions.NextPageAction" text="CodeReader Next Page"
+                description="Go to the next page.">
+            <add-to-group group-id="EditorActions" anchor="after" relative-to-action="EditorPageDown"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt meta RIGHT"/>
+        </action>
+    </actions>
 </idea-plugin>
