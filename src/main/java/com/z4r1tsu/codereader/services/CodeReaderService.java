@@ -187,31 +187,61 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void nextPage() {
+        boolean changed = false;
         if (currentPage < pages.size() - 1) {
             currentPage++;
-            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
-        } else if (book != null && currentChapterIndex != -1 && currentChapterIndex < toc.size() - 1) {
-            currentChapterIndex++;
-            loadResource(toc.get(currentChapterIndex).getResource());
+            changed = true;
+        } else if (isEpub() && hasNextChapter()) {
+            loadNextChapter();
+            changed = true;
+        }
+
+        if (changed) {
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
         }
     }
 
     public void prevPage() {
+        boolean changed = false;
         if (currentPage > 0) {
             currentPage--;
-            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
-        } else if (book != null && currentChapterIndex != -1 && currentChapterIndex > 0) {
-            currentChapterIndex--;
-            loadResource(toc.get(currentChapterIndex).getResource());
-            if (!pages.isEmpty()) {
-                currentPage = pages.size() - 1;
-            }
+            changed = true;
+        } else if (isEpub() && hasPrevChapter()) {
+            loadPrevChapter();
+            changed = true;
+        }
+
+        if (changed) {
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
         }
     }
 
     public String getCurrentFile() {
         return currentFile;
+    }
+
+    private boolean isEpub() {
+        return book != null && currentChapterIndex != -1;
+    }
+
+    private boolean hasNextChapter() {
+        return currentChapterIndex < toc.size() - 1;
+    }
+
+    private void loadNextChapter() {
+        currentChapterIndex++;
+        loadResource(toc.get(currentChapterIndex).getResource());
+    }
+
+    private boolean hasPrevChapter() {
+        return currentChapterIndex > 0;
+    }
+
+    private void loadPrevChapter() {
+        currentChapterIndex--;
+        loadResource(toc.get(currentChapterIndex).getResource());
+        if (!pages.isEmpty()) {
+            currentPage = pages.size() - 1;
+        }
     }
 }
