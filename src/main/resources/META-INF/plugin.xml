@@ -23,6 +23,10 @@
                 description="Select an epub file to read in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.OpenFile"/>
         </action>
+        <action id="CodeReader.SelectChapter" class="com.z4r1tsu.codereader.actions.SelectChapterAction" text="Select Chapter"
+                description="Select a chapter from the epub file.">
+            <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.ImportEpub"/>
+        </action>
         <action id="CodeReader.ModifyWordCount" class="com.z4r1tsu.codereader.actions.ModifyWordCountAction" text="Modify Word Count"
                 description="Modify the number of words displayed in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
