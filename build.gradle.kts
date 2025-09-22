@@ -22,6 +22,7 @@ kotlin {
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven { url = uri("https://github.com/psiegman/mvn-repo/raw/master/releases") }
 
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
@@ -33,6 +34,8 @@ repositories {
 dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
+
+    implementation("nl.siegmann.epublib:epublib-core:3.1")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {

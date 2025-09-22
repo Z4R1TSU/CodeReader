@@ -21,8 +21,11 @@ public class OpenFileAction extends AnAction {
         }
 
         FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
-                .withTitle("Choose a Txt File")
-                .withFileFilter(virtualFile -> virtualFile.getName().toLowerCase().endsWith(".txt"));
+                .withTitle("Choose a Txt or Epub File")
+                .withFileFilter(virtualFile -> {
+                    String name = virtualFile.getName().toLowerCase();
+                    return name.endsWith(".txt") || name.endsWith(".epub");
+                });
 
         FileChooser.chooseFile(descriptor, project, null, virtualFile -> {
             if (virtualFile != null) {

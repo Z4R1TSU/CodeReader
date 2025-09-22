@@ -8,6 +8,11 @@ import com.intellij.openapi.project.Project;
 import com.z4r1tsu.codereader.listeners.CodeReaderListener;
 import org.jetbrains.annotations.NotNull;
 
+import com.z4r1tsu.codereader.epub.EpubParser;
+import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.domain.Resource;
+import nl.siegmann.epublib.epub.EpubReader;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,16 +68,32 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     public void loadFile(File file) {
         pages.clear();
         currentFile = file.getAbsolutePath();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.isEmpty()) {
-                    pages.add(" "); // Represent empty line as a space to be visible
-                } else {
-                    // Split line into chunks of wordCount
-                    for (int i = 0; i < line.length(); i += myState.wordCount) {
-                        int end = Math.min(i + myState.wordCount, line.length());
-                        pages.add(line.substring(i, end));
+        String fileName = file.getName().toLowerCase();
+
+        try {
+            if (fileName.endsWith(".txt")) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.isEmpty()) {
+                            pages.add(" "); // Represent empty line as a space to be visible
+                        } else {
+                            // Split line into chunks of wordCount
+                            for (int i = 0; i < line.length(); i += myState.wordCount) {
+                                int end = Math.min(i + myState.wordCount, line.length());
+                                pages.add(line.substring(i, end));
+                            }
+                        }
+                    }
+                }
+            } else if (fileName.endsWith(".epub")) {
+                try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                    String content = new EpubParser().parse(fileInputStream);
+                    if (content != null) {
+                        for (int i = 0; i < content.length(); i += myState.wordCount) {
+                            int end = Math.min(i + myState.wordCount, content.length());
+                            pages.add(content.substring(i, end));
+                        }
                     }
                 }
             }
@@ -80,6 +101,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
             e.printStackTrace();
             pages.add("Error reading file.");
         }
+
         currentPage = 0;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
