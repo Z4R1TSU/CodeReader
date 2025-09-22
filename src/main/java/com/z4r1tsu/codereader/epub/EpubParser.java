@@ -13,7 +13,11 @@ public class EpubParser {
             StringBuilder content = new StringBuilder();
             book.getContents().forEach(item -> {
                 try {
-                    content.append(new String(item.getData()));
+                    String rawContent = new String(item.getData());
+                    // Using a simple regex to remove HTML tags. 
+                    // This may not cover all edge cases, but it's a good starting point.
+                    String plainText = rawContent.replaceAll("<[^>]*>", "");
+                    content.append(plainText);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
