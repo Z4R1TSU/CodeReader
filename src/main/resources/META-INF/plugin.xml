@@ -19,6 +19,10 @@
             <add-to-group group-id="CodeReader.Menu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="control alt O"/>
         </action>
+        <action id="CodeReader.ModifyWordCount" class="com.z4r1tsu.codereader.actions.ModifyWordCountAction" text="Modify Word Count"
+                description="Modify the number of words displayed in the status bar.">
+            <add-to-group group-id="CodeReader.Menu" anchor="last"/>
+        </action>
         <action id="CodeReader.PrevPage" class="com.z4r1tsu.codereader.actions.PrevPageAction" text="CodeReader Previous Page"
                 description="Go to the previous page.">
             <add-to-group group-id="EditorActions" anchor="after" relative-to-action="EditorPageUp"/>
