@@ -46,6 +46,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     private State myState = new State();
     private final Project project;
     private List<String> pages = new ArrayList<>();
+    private List<String> txtLines = new ArrayList<>();
+    private List<int[]> txtPageMap = new ArrayList<>();
     private int currentPage = 0;
     private String currentFile = "";
     private Book book;
@@ -76,6 +78,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     public void loadFile(File file) {
         pages.clear();
         toc.clear();
+        txtLines.clear();
+        txtPageMap.clear();
         currentFile = file.getAbsolutePath();
         String fileName = file.getName().toLowerCase();
         justLoaded = false;
@@ -87,16 +91,17 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                 totalPageCount = 0;
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
                     String line;
+                    int lineNum = 0;
                     while ((line = reader.readLine()) != null) {
+                        txtLines.add(line);
                         if (line.isEmpty()) {
-                            pages.add(" "); // Represent empty line as a space to be visible
+                            txtPageMap.add(new int[]{lineNum, 0});
                         } else {
-                            // Split line into chunks of wordCount
                             for (int i = 0; i < line.length(); i += myState.wordCount) {
-                                int end = Math.min(i + myState.wordCount, line.length());
-                                pages.add(line.substring(i, end));
+                                txtPageMap.add(new int[]{lineNum, i});
                             }
                         }
+                        lineNum++;
                     }
                 }
                 justLoaded = true;
@@ -200,16 +205,38 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         if (justLoaded) {
             return "导入成功，请翻页阅读。";
         }
-        if (pages.isEmpty()) {
-            return "No file loaded.";
+        if (book == null) { // It's a txt file
+            if (txtPageMap.isEmpty()) {
+                return "No file loaded.";
+            }
+            if (currentPage < 0) {
+                currentPage = 0;
+            }
+            if (currentPage >= txtPageMap.size()) {
+                currentPage = txtPageMap.size() - 1;
+            }
+            if (currentPage < 0) {
+                return "No file loaded.";
+            }
+            int[] pageInfo = txtPageMap.get(currentPage);
+            String line = txtLines.get(pageInfo[0]);
+            if (line.isEmpty()) {
+                return " ";
+            }
+            int end = Math.min(pageInfo[1] + myState.wordCount, line.length());
+            return line.substring(pageInfo[1], end);
+        } else { // It's an epub
+            if (pages.isEmpty()) {
+                return "No file loaded.";
+            }
+            if (currentPage < 0) {
+                currentPage = 0;
+            }
+            if (currentPage >= pages.size()) {
+                currentPage = pages.size() - 1;
+            }
+            return pages.get(currentPage);
         }
-        if (currentPage < 0) {
-            currentPage = 0;
-        }
-        if (currentPage >= pages.size()) {
-            currentPage = pages.size() - 1;
-        }
-        return pages.get(currentPage);
     }
 
     public void nextPage() {
@@ -225,7 +252,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         }
 
         boolean changed = false;
-        if (currentPage < pages.size() - 1) {
+        int totalPages = isEpub() ? pages.size() : txtPageMap.size();
+        if (currentPage < totalPages - 1) {
             currentPage++;
             changed = true;
         } else if (isEpub() && hasNextChapter()) {
@@ -271,6 +299,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     public void clearCache() {
         pages.clear();
         toc.clear();
+        txtLines.clear();
+        txtPageMap.clear();
         book = null;
         currentFile = "";
         currentPage = 0;
