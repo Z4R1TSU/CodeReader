@@ -19,6 +19,7 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         this.label = new JLabel(getDisplayText());
         project.getMessageBus().connect(this).subscribe(CodeReaderListener.TOPIC, () -> {
             label.setText(getDisplayText());
+            label.setVisible(CodeReaderService.getInstance(project).isVisible());
         });
     }
 
@@ -34,6 +35,9 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
 
     private String getDisplayText() {
         CodeReaderService service = CodeReaderService.getInstance(project);
+        if (!service.isVisible()) {
+            return "";
+        }
         if (service.getShowChapterInfo()) {
             return String.format("%s %s %s %s",
                     service.getCurrentChapterTitle(),

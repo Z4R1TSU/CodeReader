@@ -31,7 +31,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     public static class State {
         public int wordCount = 30;
-        public boolean showChapterInfo = true;
+        public boolean showChapterInfo = false;
+        public boolean isVisible = false;
 
         public int getWordCount() {
             return wordCount;
@@ -119,6 +120,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         }
 
         currentPage = 0;
+        myState.isVisible = true;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
 
@@ -255,6 +257,15 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     public void toggleChapterInfo() {
         myState.showChapterInfo = !myState.showChapterInfo;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+    }
+
+    public void toggleVisibility() {
+        myState.isVisible = !myState.isVisible;
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+    }
+
+    public boolean isVisible() {
+        return myState.isVisible;
     }
 
     public boolean getShowChapterInfo() {
