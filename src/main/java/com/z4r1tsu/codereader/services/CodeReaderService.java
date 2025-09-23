@@ -51,6 +51,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     private List<TOCEntry> toc = new ArrayList<>();
     private int currentChapterIndex = -1;
     private int totalPageCount = 0;
+    private boolean justLoaded = false;
 
     public CodeReaderService(Project project) {
         this.project = project;
@@ -75,6 +76,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         toc.clear();
         currentFile = file.getAbsolutePath();
         String fileName = file.getName().toLowerCase();
+        justLoaded = false;
 
         try {
             if (fileName.endsWith(".txt")) {
@@ -95,6 +97,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                         }
                     }
                 }
+                justLoaded = true;
             } else if (fileName.endsWith(".epub")) {
                 try (FileInputStream fileInputStream = new FileInputStream(file)) {
                     this.book = (new EpubReader()).readEpub(fileInputStream);
@@ -104,6 +107,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                             calculateTotalPageCount();
                             currentChapterIndex = 0;
                             loadResource(toc.get(0).getResource());
+                            justLoaded = true;
                         }
                     }
                 }
@@ -111,6 +115,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         } catch (IOException e) {
             e.printStackTrace();
             pages.add("Error reading file.");
+            justLoaded = false;
         }
 
         currentPage = 0;
@@ -174,6 +179,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                 }
             }
             loadResource(entry.getResource());
+            justLoaded = true;
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
         }
     }
@@ -185,6 +191,9 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public String getCurrentPageContent() {
+        if (justLoaded) {
+            return "导入成功，请翻页阅读。";
+        }
         if (pages.isEmpty()) {
             return "No file loaded.";
         }
@@ -198,6 +207,12 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void nextPage() {
+        if (justLoaded) {
+            justLoaded = false;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            return;
+        }
+
         boolean changed = false;
         if (currentPage < pages.size() - 1) {
             currentPage++;
@@ -213,6 +228,12 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void prevPage() {
+        if (justLoaded) {
+            justLoaded = false;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            return;
+        }
+
         boolean changed = false;
         if (currentPage > 0) {
             currentPage--;
