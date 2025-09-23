@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- Improved performance for loading large `.txt` files by using a more memory-efficient page indexing method.
+
 ### Added
 
 - Add `platformBundledModules` to `gradle.properties` along with `bundledModules()` helper to the Gradle build file
