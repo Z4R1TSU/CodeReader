@@ -8,6 +8,8 @@ import com.z4r1tsu.codereader.services.CodeReaderService;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
 
@@ -20,6 +22,15 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         project.getMessageBus().connect(this).subscribe(CodeReaderListener.TOPIC, () -> {
             label.setText(getDisplayText());
             label.setVisible(CodeReaderService.getInstance(project).isVisible());
+        });
+
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    CodeReaderService.getInstance(project).toggleVisibility();
+                }
+            }
         });
     }
 
