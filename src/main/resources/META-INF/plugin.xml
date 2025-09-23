@@ -14,12 +14,12 @@
         <group id="CodeReader.Menu" text="CodeReader" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-        <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="Import from local txt file"
+        <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="Import from Local Txt File"
                 description="Select a txt file to read in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="control alt O"/>
         </action>
-        <action id="CodeReader.ImportEpub" class="com.z4r1tsu.codereader.actions.ImportEpubAction" text="Import from local epub file"
+        <action id="CodeReader.ImportEpub" class="com.z4r1tsu.codereader.actions.ImportEpubAction" text="Import from Local Epub File"
                 description="Select an epub file to read in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.OpenFile"/>
         </action>
@@ -27,7 +27,7 @@
                 description="Select a chapter from the epub file.">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.ImportEpub"/>
         </action>
-        <action id="CodeReader.ModifyWordCount" class="com.z4r1tsu.codereader.actions.ModifyWordCountAction" text="Modify Word Count"
+        <action id="CodeReader.ModifyWordCount" class="com.z4r1tsu.codereader.actions.ModifyWordCountAction" text="Modify Word Count per Page"
                 description="Modify the number of words displayed in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
         </action>
