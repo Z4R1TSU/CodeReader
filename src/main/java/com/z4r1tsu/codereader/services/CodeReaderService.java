@@ -31,6 +31,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     public static class State {
         public int wordCount = 30;
+        public boolean showChapterInfo = true;
 
         public int getWordCount() {
             return wordCount;
@@ -49,6 +50,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     private Book book;
     private List<TOCEntry> toc = new ArrayList<>();
     private int currentChapterIndex = -1;
+    private int totalPageCount = 0;
 
     public CodeReaderService(Project project) {
         this.project = project;
@@ -78,6 +80,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
             if (fileName.endsWith(".txt")) {
                 book = null;
                 currentChapterIndex = -1;
+                totalPageCount = 0;
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -98,6 +101,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                     if (book != null) {
                         extractToc(book.getTableOfContents().getTocReferences(), 0);
                         if (!toc.isEmpty()) {
+                            calculateTotalPageCount();
                             currentChapterIndex = 0;
                             loadResource(toc.get(0).getResource());
                         }
@@ -142,6 +146,13 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                 }
             } else {
                 pages.add(" ");
+            }
+
+            for (TOCEntry entry : toc) {
+                if (entry.getResource().getHref().equals(resource.getHref())) {
+                    entry.setPageCount(pages.size());
+                    break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -218,6 +229,59 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     public String getCurrentFile() {
         return currentFile;
+    }
+
+    public void toggleChapterInfo() {
+        myState.showChapterInfo = !myState.showChapterInfo;
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+    }
+
+    public boolean getShowChapterInfo() {
+        return myState.showChapterInfo;
+    }
+
+    public String getCurrentChapterTitle() {
+        if (isEpub() && currentChapterIndex >= 0 && currentChapterIndex < toc.size()) {
+            return toc.get(currentChapterIndex).getTitle();
+        }
+        return "";
+    }
+
+    public String getCurrentChapterProgress() {
+        if (isEpub()) {
+            TOCEntry currentChapter = toc.get(currentChapterIndex);
+            return String.format("(%d/%d)", currentPage + 1, currentChapter.getPageCount());
+        }
+        return "";
+    }
+
+    public String getBookProgress() {
+        if (isEpub() && totalPageCount > 0) {
+            int pagesRead = 0;
+            for (int i = 0; i < currentChapterIndex; i++) {
+                pagesRead += toc.get(i).getPageCount();
+            }
+            pagesRead += currentPage;
+            int progress = (int) (((double) pagesRead / totalPageCount) * 100);
+            return String.format("[%d%%]", progress);
+        }
+        return "";
+    }
+
+    private void calculateTotalPageCount() {
+        totalPageCount = 0;
+        for (TOCEntry entry : toc) {
+            try {
+                Resource resource = entry.getResource();
+                String rawContent = new String(resource.getData(), StandardCharsets.UTF_8);
+                String plainText = rawContent.replaceAll("<[^>]*>", "");
+                int pageCount = (int) Math.ceil((double) plainText.length() / myState.wordCount);
+                entry.setPageCount(pageCount);
+                totalPageCount += pageCount;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private boolean isEpub() {

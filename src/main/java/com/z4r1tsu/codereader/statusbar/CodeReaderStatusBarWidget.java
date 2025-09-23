@@ -12,11 +12,13 @@ import javax.swing.*;
 public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
 
     private final JLabel label;
+    private final Project project;
 
     public CodeReaderStatusBarWidget(Project project) {
-        this.label = new JLabel(CodeReaderService.getInstance(project).getCurrentPageContent());
+        this.project = project;
+        this.label = new JLabel(getDisplayText());
         project.getMessageBus().connect(this).subscribe(CodeReaderListener.TOPIC, () -> {
-            label.setText(CodeReaderService.getInstance(project).getCurrentPageContent());
+            label.setText(getDisplayText());
         });
     }
 
@@ -28,6 +30,18 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
     @Override
     public @NotNull String ID() {
         return "CodeReaderStatusBar";
+    }
+
+    private String getDisplayText() {
+        CodeReaderService service = CodeReaderService.getInstance(project);
+        if (service.getShowChapterInfo()) {
+            return String.format("%s %s %s %s",
+                    service.getCurrentChapterTitle(),
+                    service.getCurrentChapterProgress(),
+                    service.getBookProgress(),
+                    service.getCurrentPageContent());
+        }
+        return service.getCurrentPageContent();
     }
 
     @Override

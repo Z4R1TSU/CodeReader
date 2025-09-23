@@ -45,5 +45,9 @@
                 description="Shows or hides the CodeReader status bar widget.">
             <keyboard-shortcut keymap="$default" first-keystroke="alt meta H"/>
         </action>
+        <action id="CodeReader.ToggleChapterInfo" class="com.z4r1tsu.codereader.actions.ToggleChapterInfoAction" text="Toggle CodeReader Chapter Info Visibility"
+                description="Shows or hides the CodeReader chapter info in the status bar widget.">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt meta J"/>
+        </action>
     </actions>
 </idea-plugin>
