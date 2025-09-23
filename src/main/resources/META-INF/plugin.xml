@@ -31,6 +31,10 @@
                 description="Modify the number of words displayed in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
         </action>
+        <action id="CodeReader.ClearCache" class="com.z4r1tsu.codereader.actions.ClearCacheAction" text="Clear Cache"
+                description="Clears the cache of the CodeReader plugin.">
+            <add-to-group group-id="CodeReader.Menu" anchor="last"/>
+        </action>
         <action id="CodeReader.PrevPage" class="com.z4r1tsu.codereader.actions.PrevPageAction" text="CodeReader Previous Page"
                 description="Go to the previous page.">
             <add-to-group group-id="EditorActions" anchor="after" relative-to-action="EditorPageUp"/>

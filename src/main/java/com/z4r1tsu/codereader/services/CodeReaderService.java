@@ -53,6 +53,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     private int currentChapterIndex = -1;
     private int totalPageCount = 0;
     private boolean justLoaded = false;
+    private boolean cacheCleared = false;
 
     public CodeReaderService(Project project) {
         this.project = project;
@@ -193,6 +194,9 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public String getCurrentPageContent() {
+        if (cacheCleared) {
+            return "缓存已清除。";
+        }
         if (justLoaded) {
             return "导入成功，请翻页阅读。";
         }
@@ -209,6 +213,11 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void nextPage() {
+        if (cacheCleared) {
+            cacheCleared = false;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            return;
+        }
         if (justLoaded) {
             justLoaded = false;
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
@@ -230,6 +239,11 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void prevPage() {
+        if (cacheCleared) {
+            cacheCleared = false;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            return;
+        }
         if (justLoaded) {
             justLoaded = false;
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
@@ -252,6 +266,20 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     public String getCurrentFile() {
         return currentFile;
+    }
+
+    public void clearCache() {
+        pages.clear();
+        toc.clear();
+        book = null;
+        currentFile = "";
+        currentPage = 0;
+        currentChapterIndex = -1;
+        totalPageCount = 0;
+        justLoaded = false;
+        cacheCleared = true;
+        myState.isVisible = true;
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
 
     public void toggleChapterInfo() {
