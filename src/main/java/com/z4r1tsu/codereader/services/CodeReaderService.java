@@ -352,8 +352,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                 pagesRead += toc.get(i).getPageCount();
             }
             pagesRead += currentPage;
-            int progress = (int) (((double) pagesRead / totalPageCount) * 100);
-            return String.format("[%d%%]", progress);
+            double progress = ((double) pagesRead / totalPageCount) * 100;
+            return String.format("[%.2f%%]", progress);
         }
         return "";
     }
