@@ -6,6 +6,68 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <description><![CDATA[
+        CodeReader is a pure JetBrains IDE novel reading plugin for programmers to slack off, supporting local file uploads. This plugin allows you to read books in .txt and .epub format directly in the IDE's status bar, providing a seamless way to switch between coding and reading without leaving your development environment.
+        <br/><br/>
+        ---
+        <br/><br/>
+        CodeReader 是一款纯粹的、用于程序员上班摸鱼的、支持本地文件上传的、JetBrains IDE 小说阅读插件。
+        <br/><br/>
+        欢迎使用 CodeReader 插件！本插件可让您直接在 IDE 的状态栏中阅读 <code>.txt</code> 和 <code>.epub</code> 格式的书籍，提供一种在编码和阅读之间无缝切换的方式，而无需离开您的开发环境。
+
+        <h2>功能</h2>
+        <ul>
+            <li><strong>在状态栏中阅读</strong>: 在状态栏中逐页显示您的书籍内容。</li>
+            <li><strong>支持 .txt 和 .epub</strong>: 从纯文本和 EPUB 文件加载书籍。</li>
+            <li><strong>高效的 .txt 文件处理</strong>: 采用优化的内存管理策略，即使是大型 .txt 文件也能实现快速加载和流畅的阅读体验。</li>
+            <li><strong>章节导航</strong>: 对于 .epub 文件，您可以轻松地在章节之间导航。</li>
+            <li><strong>翻页</strong>: 使用简单的键盘快捷键在页面之间移动。</li>
+            <li><strong>可自定义显示</strong>: 调整一次显示的字数，并切换阅读器和章节信息的可见性。</li>
+        </ul>
+
+        <h2>如何使用</h2>
+        <h3>加载书籍</h3>
+        <ul>
+            <li><strong>从菜单</strong>: 前往 <code>工具 -> CodeReader</code> 并选择 <code>从本地 txt 文件导入</code> 或 <code>从本地 epub 文件导入</code>。</li>
+            <li><strong>键盘快捷键</strong>: 使用 <code>control + alt + O</code> 打开文件选择对话框。</li>
+        </ul>
+
+        <h3>阅读</h3>
+        <ul>
+            <li><strong>下一页</strong>: <code>alt + meta + RIGHT</code></li>
+            <li><strong>上一页</strong>: <code>alt + meta + LEFT</code></li>
+        </ul>
+
+        <h3>显示选项</h3>
+        <ul>
+            <li><strong>切换阅读器可见性</strong>: <code>alt + meta + H</code> 或 直接点击状态栏中的插件主体 以显示或隐藏状态栏中的 CodeReader。</li>
+            <li><strong>切换章节信息</strong>: <code>alt + meta + J</code> 以显示或隐藏当前章节标题、章节进度和书籍进度（仅适用于 .epub 文件）。</li>
+            <li><strong>修改字数</strong>: 前往 <code>工具 -> CodeReader -> 修改字数</code> 以更改一次显示的字数。</li>
+        </ul>
+
+        <h3>章节选择</h3>
+        <ul>
+            <li><strong>选择章节</strong>: 对于 .epub 文件，您可以通过前往 <code>工具 -> CodeReader -> 选择章节</code> 来跳转到特定章节。</li>
+        </ul>
+
+        <h3>调整快捷键</h3>
+        <ul>
+            <li><strong>调整快捷键</strong>: 前往 <code>设置 -> Keymap -> 搜索 "CodeReader"</code> 以调整插件的快捷键。</li>
+        </ul>
+
+        <h2>问答</h2>
+        <ul>
+            <li><strong>Q: 插件支持哪些文件格式？</strong></li>
+            <li><strong>A</strong>: 插件支持 .txt 和 .epub 文件格式。</li>
+            <li><strong>Q：还会支持其他文件格式吗？</strong></li>
+            <li><strong>A</strong>: 常用的小说文件格式还有 <code>AZW3</code>、<code>MOBI</code> 等。前者目前只有一个商用的库可以解析，怕有一些问题；后者完全是下位替代，不太好用不想做。</li>
+            <li><strong>Q: 插件是否支持从网络上下载文件？</strong></li>
+            <li><strong>A</strong>: 不支持。作者从来都是本地下载小说再阅读的（因为能找到高质量的书），网站上太过良莠不齐不喜欢用。</li>
+        </ul>
+
+        感谢您使用 CodeReader！我们希望它能帮助您保持高效并享受阅读。
+    ]]></description>
+
     <extensions defaultExtensionNs="com.intellij">
         <statusBarWidgetFactory id="CodeReaderStatusBar" implementation="com.z4r1tsu.codereader.statusbar.CodeReaderStatusBarWidgetFactory" order="after MemoryIndicator"/>
     </extensions>
@@ -17,7 +79,6 @@
         <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="Import from Local Txt File"
                 description="Select a txt file to read in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="first"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="control alt O"/>
         </action>
         <action id="CodeReader.ImportEpub" class="com.z4r1tsu.codereader.actions.ImportEpubAction" text="Import from Local Epub File"
                 description="Select an epub file to read in the status bar.">
