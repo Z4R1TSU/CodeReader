@@ -26,4 +26,8 @@ public final class HistoryService {
     public List<ReadingHistory> getHistories() {
         return histories;
     }
+
+    public void clearHistory() {
+        histories.clear();
+    }
 }

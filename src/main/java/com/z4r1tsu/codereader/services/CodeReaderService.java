@@ -350,6 +350,9 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         cacheCleared = true;
         myState.isVisible = true;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+
+        HistoryService historyService = HistoryService.getInstance(project);
+        historyService.clearHistory();
     }
 
     public void toggleChapterInfo() {
