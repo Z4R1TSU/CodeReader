@@ -55,6 +55,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     private int currentChapterIndex = -1;
     private int totalPageCount = 0;
     private boolean justLoaded = false;
+    private boolean chapterJustJumped = false;
     private boolean cacheCleared = false;
 
     public CodeReaderService(Project project) {
@@ -83,6 +84,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         currentFile = file.getAbsolutePath();
         String fileName = file.getName().toLowerCase();
         justLoaded = false;
+        chapterJustJumped = false;
 
         try {
             if (fileName.endsWith(".txt")) {
@@ -187,7 +189,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                 }
             }
             loadResource(entry.getResource());
-            justLoaded = true;
+            justLoaded = false;
+            chapterJustJumped = true;
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
         }
     }
@@ -200,10 +203,17 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     public String getCurrentPageContent() {
         if (cacheCleared) {
-            return "缓存已清除。";
+            return "缓存已清除";
         }
         if (justLoaded) {
-            return "导入成功，请翻页阅读。";
+            return "导入成功，请翻页阅读";
+        }
+        if (chapterJustJumped) {
+            String title = getCurrentChapterTitle().trim();
+            if (title.isEmpty()) {
+                return "请翻页阅读";
+            }
+            return "成功跳转至【" + title + "】，请翻页阅读";
         }
         if (book == null) { // It's a txt file
             if (txtPageMap.isEmpty()) {
@@ -250,6 +260,11 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
             return;
         }
+        if (chapterJustJumped) {
+            chapterJustJumped = false;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            return;
+        }
 
         boolean changed = false;
         int totalPages = isEpub() ? pages.size() : txtPageMap.size();
@@ -274,6 +289,11 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         }
         if (justLoaded) {
             justLoaded = false;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            return;
+        }
+        if (chapterJustJumped) {
+            chapterJustJumped = false;
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
             return;
         }
@@ -307,6 +327,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         currentChapterIndex = -1;
         totalPageCount = 0;
         justLoaded = false;
+        chapterJustJumped = false;
         cacheCleared = true;
         myState.isVisible = true;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
