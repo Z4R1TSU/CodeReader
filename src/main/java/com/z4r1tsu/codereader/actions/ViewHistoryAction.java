@@ -26,6 +26,9 @@ public class ViewHistoryAction extends AnAction {
         List<ReadingHistory> histories = historyService.getHistories();
 
         if (histories.isEmpty()) {
+            JBPopupFactory.getInstance()
+                    .createMessage("No reading history found.")
+                    .showInBestPositionFor(e.getDataContext());
             return;
         }
 
