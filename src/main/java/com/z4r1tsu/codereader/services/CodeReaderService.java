@@ -9,7 +9,6 @@ import com.intellij.openapi.project.Project;
 import com.z4r1tsu.codereader.epub.TOCEntry;
 import com.z4r1tsu.codereader.history.HistoryService;
 import com.z4r1tsu.codereader.history.ReadingHistory;
-import com.z4r1tsu.codereader.history.ReadingHistory;
 import com.z4r1tsu.codereader.listeners.CodeReaderListener;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
@@ -58,9 +57,15 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     private List<TOCEntry> toc = new ArrayList<>();
     private int currentChapterIndex = -1;
     private int totalPageCount = 0;
-    private boolean justLoaded = false;
-    private boolean chapterJustJumped = false;
-    private boolean cacheCleared = false;
+
+    private enum ReaderState {
+        IDLE,
+        JUST_LOADED,
+        CHAPTER_JUST_JUMPED,
+        CACHE_CLEARED
+    }
+
+    private ReaderState readerState = ReaderState.IDLE;
 
     public CodeReaderService(Project project) {
         this.project = project;
@@ -88,8 +93,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         txtPageMap.clear();
         currentFile = file.getAbsolutePath();
         String fileName = file.getName().toLowerCase();
-        justLoaded = false;
-        chapterJustJumped = false;
+        readerState = ReaderState.IDLE;
 
         try {
             if (fileName.endsWith(".txt")) {
@@ -111,7 +115,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                         lineNum++;
                     }
                 }
-                justLoaded = true;
+                readerState = ReaderState.JUST_LOADED;
             } else if (fileName.endsWith(".epub")) {
                 try (FileInputStream fileInputStream = new FileInputStream(file)) {
                     this.book = (new EpubReader()).readEpub(fileInputStream);
@@ -121,7 +125,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                             calculateTotalPageCount();
                             currentChapterIndex = 0;
                             loadResource(toc.get(0).getResource());
-                            justLoaded = true;
+                            readerState = ReaderState.JUST_LOADED;
                         }
                     }
                 }
@@ -129,7 +133,6 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         } catch (IOException e) {
             e.printStackTrace();
             pages.add("Error reading file.");
-            justLoaded = false;
         }
 
         currentPage = 0;
@@ -151,8 +154,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         }
 
         currentPage = history.getCurrentPage();
-        justLoaded = false;
-        chapterJustJumped = false;
+        readerState = ReaderState.IDLE;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
 
@@ -213,8 +215,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
                 }
             }
             loadResource(entry.getResource());
-            justLoaded = false;
-            chapterJustJumped = true;
+            readerState = ReaderState.CHAPTER_JUST_JUMPED;
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
             saveCurrentStateToHistory();
         }
@@ -227,16 +228,20 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public String getCurrentPageContent() {
-        if (cacheCleared) {
-            return "缓存已清除";
+        switch (readerState) {
+            case CACHE_CLEARED:
+                return "缓存已清除";
+            case JUST_LOADED:
+                return "导入成功，请翻页阅读";
+            case CHAPTER_JUST_JUMPED:
+                String title = getCurrentChapterTitle().trim();
+                if (title.isEmpty()) {
+                    return "请翻页阅读";
+                }
+                return "成功跳转至【" + title + "】，请翻页阅读";
+            default:
+                return getActualCurrentPageContent();
         }
-        if (justLoaded) {
-            return "导入成功，请翻页阅读";
-        }
-        if (chapterJustJumped) {
-            chapterJustJumped = false;
-        }
-        return getActualCurrentPageContent();
     }
 
     private String getActualCurrentPageContent() {
@@ -275,17 +280,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void nextPage() {
-        if (cacheCleared) {
-            cacheCleared = false;
-            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
-            return;
-        }
-        if (justLoaded) {
-            justLoaded = false;
-        }
-        if (chapterJustJumped) {
-            chapterJustJumped = false;
-        }
+        if (handleStateAfterPageTurn()) return;
 
         boolean changed = false;
         int totalPages = isEpub() ? pages.size() : txtPageMap.size();
@@ -304,17 +299,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void prevPage() {
-        if (cacheCleared) {
-            cacheCleared = false;
-            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
-            return;
-        }
-        if (justLoaded) {
-            justLoaded = false;
-        }
-        if (chapterJustJumped) {
-            chapterJustJumped = false;
-        }
+        if (handleStateAfterPageTurn()) return;
 
         boolean changed = false;
         if (currentPage > 0) {
@@ -331,6 +316,15 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         }
     }
 
+    private boolean handleStateAfterPageTurn() {
+        if (readerState != ReaderState.IDLE) {
+            readerState = ReaderState.IDLE;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            return true;
+        }
+        return false;
+    }
+
     public String getCurrentFile() {
         return currentFile;
     }
@@ -345,10 +339,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         currentPage = 0;
         currentChapterIndex = -1;
         totalPageCount = 0;
-        justLoaded = false;
-        chapterJustJumped = false;
-        cacheCleared = true;
-        myState.isVisible = true;
+        readerState = ReaderState.CACHE_CLEARED;
+        myState.isVisible = false;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
 
         HistoryService historyService = HistoryService.getInstance(project);
