@@ -88,6 +88,10 @@
                 description="Select a chapter from the epub file.">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.ImportEpub"/>
         </action>
+        <action id="CodeReader.ViewHistory" class="com.z4r1tsu.codereader.actions.ViewHistoryAction" text="View Reading History"
+                description="View and jump to previous reading sessions.">
+            <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.SelectChapter"/>
+        </action>
         <action id="CodeReader.ModifyWordCount" class="com.z4r1tsu.codereader.actions.ModifyWordCountAction" text="Modify Word Count per Page"
                 description="Modify the number of words displayed in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
