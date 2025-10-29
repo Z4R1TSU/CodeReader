@@ -76,13 +76,9 @@
         <group id="CodeReader.Menu" text="CodeReader" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-        <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="Import from Local Txt File"
+        <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="Import Book from Local File"
                 description="Select a txt file to read in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="first"/>
-        </action>
-        <action id="CodeReader.ImportEpub" class="com.z4r1tsu.codereader.actions.ImportEpubAction" text="Import from Local Epub File"
-                description="Select an epub file to read in the status bar.">
-            <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.OpenFile"/>
         </action>
         <action id="CodeReader.SelectChapter" class="com.z4r1tsu.codereader.actions.SelectChapterAction" text="Select Chapter"
                 description="Select a chapter from the epub file.">

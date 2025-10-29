@@ -6,7 +6,7 @@
 
 You can load a book in two ways:
 
-1.  **From the Menu**: Navigate to `Tools -> CodeReader` and select either `Import from Local Txt File` or `Import from Local Epub File`.
+1.  **From the Menu**: Navigate to `Tools -> CodeReader` and select either `Import book from Local File`.
 2.  **Keyboard Shortcut**: Use `control + alt + O` to open the file chooser dialog.
 
 ### Reading
