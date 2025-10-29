@@ -31,7 +31,7 @@ public class SelectChapterAction extends AnAction {
 
         final JBList<TOCEntry> list = new JBList<>(toc);
         if (currentChapterIndex >= 0 && currentChapterIndex < toc.size()) {
-            list.setSelectedIndex(currentChapterIndex);
+            SwingUtilities.invokeLater(() -> list.ensureIndexIsVisible(currentChapterIndex));
         }
 
         var builder = JBPopupFactory.getInstance().createListPopupBuilder(list)

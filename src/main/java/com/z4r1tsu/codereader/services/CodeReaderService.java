@@ -49,6 +49,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     private enum ReaderState {
         IDLE,
+        LOADING,
         JUST_LOADED,
         CHAPTER_JUST_JUMPED,
         CACHE_CLEARED
@@ -77,12 +78,17 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     public void loadFile(File file) {
         saveCurrentStateToHistory();
 
+        readerState = ReaderState.LOADING;
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+
         String filePath = file.getAbsolutePath();
         if (filePath.endsWith(".txt")) {
             reader = new TxtReader();
         } else if (filePath.endsWith(".epub")) {
             reader = new EpubReader();
         } else {
+            readerState = ReaderState.IDLE;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
             return;
         }
 
@@ -148,6 +154,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         switch (readerState) {
             case CACHE_CLEARED:
                 return "缓存已清除";
+            case LOADING:
+                return "Loading...";
             case JUST_LOADED:
                 return "导入成功，请翻页阅读";
             case CHAPTER_JUST_JUMPED:
