@@ -358,6 +358,10 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         return myState.showChapterInfo;
     }
 
+    public int getCurrentChapterIndex() {
+        return currentChapterIndex;
+    }
+
     public String getCurrentChapterTitle() {
         if (isEpub() && currentChapterIndex >= 0 && currentChapterIndex < toc.size()) {
             return toc.get(currentChapterIndex).getTitle();

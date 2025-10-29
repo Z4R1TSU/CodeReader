@@ -5,10 +5,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.ui.components.JBList;
 import com.z4r1tsu.codereader.epub.TOCEntry;
 import com.z4r1tsu.codereader.services.CodeReaderService;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.util.List;
 
 public class SelectChapterAction extends AnAction {
@@ -19,26 +21,37 @@ public class SelectChapterAction extends AnAction {
             return;
         }
 
-        CodeReaderService service = CodeReaderService.getInstance(project);
-        List<TOCEntry> toc = service.getToc();
+        CodeReaderService codeReaderService = CodeReaderService.getInstance(project);
+        List<TOCEntry> toc = codeReaderService.getToc();
+        int currentChapterIndex = codeReaderService.getCurrentChapterIndex();
 
-        if (toc == null || toc.isEmpty()) {
+        if (toc.isEmpty()) {
             return;
         }
 
-        JBPopup popup = JBPopupFactory.getInstance()
-                .createPopupChooserBuilder(toc)
+        final JBList<TOCEntry> list = new JBList<>(toc);
+        if (currentChapterIndex >= 0 && currentChapterIndex < toc.size()) {
+            list.setSelectedIndex(currentChapterIndex);
+        }
+
+        var builder = JBPopupFactory.getInstance().createListPopupBuilder(list)
                 .setTitle("Select Chapter")
                 .setMovable(true)
                 .setResizable(true)
-                .setItemChosenCallback((selectedValue) -> {
+                .setItemChosenCallback(() -> {
+                    TOCEntry selectedValue = list.getSelectedValue();
                     if (selectedValue != null) {
-                        service.jumpToChapter(selectedValue);
+                        codeReaderService.jumpToChapter(selectedValue);
                     }
-                })
-                .createPopup();
+                });
+
+        JBPopup popup = builder.createPopup();
 
         popup.showInBestPositionFor(e.getDataContext());
+
+        if (currentChapterIndex >= 0 && currentChapterIndex < toc.size()) {
+            SwingUtilities.invokeLater(() -> list.ensureIndexIsVisible(currentChapterIndex));
+        }
     }
 
     @Override
