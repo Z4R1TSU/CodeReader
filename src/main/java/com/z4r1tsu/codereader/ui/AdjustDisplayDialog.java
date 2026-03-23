@@ -23,7 +23,7 @@ public class AdjustDisplayDialog extends DialogWrapper {
         CodeReaderService.State state = CodeReaderService.getInstance(project).getState();
         this.originalVisibility = state.visibility;
 
-        setTitle("Adjust Display Settings");
+        setTitle("调节显示可见度");
         init();
     }
 
@@ -37,7 +37,7 @@ public class AdjustDisplayDialog extends DialogWrapper {
 
         // Visibility Panel
         JPanel visibilityPanel = new JPanel(new BorderLayout());
-        visibilityLabel = new JLabel("Visibility (" + state.visibility + "%): ");
+        visibilityLabel = new JLabel("可见度 (" + state.visibility + "%): ");
         // 预设一个稍微宽一点的固定尺寸，防止数字从 9% 变成 100% 时宽度跳动，导致右侧的 Slider 跟着抖动
         visibilityLabel.setPreferredSize(new Dimension(120, visibilityLabel.getPreferredSize().height));
         visibilityPanel.add(visibilityLabel, BorderLayout.WEST);
@@ -57,7 +57,7 @@ public class AdjustDisplayDialog extends DialogWrapper {
         CodeReaderService.State state = CodeReaderService.getInstance(project).getState();
         int currentValue = visibilitySlider.getValue();
         state.visibility = currentValue;
-        visibilityLabel.setText("Visibility (" + currentValue + "%): ");
+        visibilityLabel.setText("可见度 (" + currentValue + "%): ");
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
 

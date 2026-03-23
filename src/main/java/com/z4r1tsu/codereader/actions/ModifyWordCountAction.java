@@ -15,20 +15,20 @@ public class ModifyWordCountAction extends AnAction {
             return;
         }
         String currentWordCount = String.valueOf(CodeReaderService.getInstance(project).getState().getWordCount());
-        String newWordCount = Messages.showInputDialog("Enter the number of words to display in the status bar:", "Modify Word Count", null, currentWordCount, null);
+        String newWordCount = Messages.showInputDialog("请输入单页显示的字数:", "修改字数", null, currentWordCount, null);
         if (newWordCount != null) {
             try {
                 int wordCount = Integer.parseInt(newWordCount);
                 if (wordCount <= 0) {
-                    Messages.showErrorDialog("Please enter a positive number.", "Invalid Number");
+                    Messages.showErrorDialog("请输入一个正数。", "无效数字");
                 } else if (wordCount > 150) {
-                    Messages.showErrorDialog("Please enter a number less than 150.", "Invalid Number");
+                    Messages.showErrorDialog("请输入一个小于150的数字。", "无效数字");
                 } else {
                     CodeReaderService.getInstance(project).getState().setWordCount(wordCount);
                     CodeReaderService.getInstance(project).refreshContent();
                 }
             } catch (NumberFormatException ex) {
-                Messages.showErrorDialog("Please enter a valid number.", "Invalid Number");
+                Messages.showErrorDialog("请输入一个有效的数字。", "无效数字");
             }
         }
     }

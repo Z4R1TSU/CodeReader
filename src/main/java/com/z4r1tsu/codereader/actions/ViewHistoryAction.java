@@ -27,7 +27,7 @@ public class ViewHistoryAction extends AnAction {
 
         if (histories.isEmpty()) {
             JBPopupFactory.getInstance()
-                    .createMessage("No reading history found.")
+                    .createMessage("没有找到阅读历史。")
                     .showInBestPositionFor(e.getDataContext());
             return;
         }
@@ -38,7 +38,7 @@ public class ViewHistoryAction extends AnAction {
 
         JBPopup popup = JBPopupFactory.getInstance()
                 .createListPopupBuilder(historyList)
-                .setTitle("Reading History")
+                .setTitle("阅读历史")
                 .setMovable(true)
                 .setResizable(true)
                 .setItemChoosenCallback(() -> {

@@ -21,7 +21,7 @@ public class AutoPageDialog extends DialogWrapper {
         super(project, true);
         this.project = project;
 
-        setTitle("Auto Page Settings");
+        setTitle("自动翻页设置");
         init();
     }
 
@@ -36,15 +36,15 @@ public class AutoPageDialog extends DialogWrapper {
 
         // Enable Panel
         JPanel enablePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        enableCheckBox = new JCheckBox("Enable Auto Page");
+        enableCheckBox = new JCheckBox("开启自动翻页");
         enableCheckBox.setSelected(service.isAutoPageRunning());
         enableCheckBox.addActionListener(e -> updateSliderState());
         enablePanel.add(enableCheckBox);
 
         // Interval Panel
         JPanel intervalPanel = new JPanel(new BorderLayout());
-        intervalLabel = new JLabel(String.format("Interval (%.1fs): ", state.autoPageInterval));
-        intervalLabel.setPreferredSize(new Dimension(100, intervalLabel.getPreferredSize().height));
+        intervalLabel = new JLabel(String.format("翻页间隔 (%.1f秒): ", state.autoPageInterval));
+        intervalLabel.setPreferredSize(new Dimension(130, intervalLabel.getPreferredSize().height));
         intervalPanel.add(intervalLabel, BorderLayout.WEST);
 
         // Slider from 1 to 50 representing 0.1s to 5.0s
@@ -53,14 +53,14 @@ public class AutoPageDialog extends DialogWrapper {
         
         // Add labels for 0.1s and 5.0s
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
-        labelTable.put(1, new JLabel("0.1s"));
-        labelTable.put(50, new JLabel("5.0s"));
+        labelTable.put(1, new JLabel("0.1秒"));
+        labelTable.put(50, new JLabel("5.0秒"));
         intervalSlider.setLabelTable(labelTable);
         intervalSlider.setPaintLabels(true);
         
         intervalSlider.addChangeListener(e -> {
             float seconds = intervalSlider.getValue() / 10.0f;
-            intervalLabel.setText(String.format("Interval (%.1fs): ", seconds));
+            intervalLabel.setText(String.format("翻页间隔 (%.1f秒): ", seconds));
         });
         intervalPanel.add(intervalSlider, BorderLayout.CENTER);
 

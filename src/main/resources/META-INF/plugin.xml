@@ -76,54 +76,55 @@
         <group id="CodeReader.Menu" text="CodeReader" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-        <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="Import Book from Local File"
-                description="Select a txt file to read in the status bar.">
+        <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="导入本地文件 (txt/epub)"
+                description="选择一个本地书籍文件导入并阅读。">
             <add-to-group group-id="CodeReader.Menu" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="control alt O"/>
         </action>
-        <action id="CodeReader.SelectChapter" class="com.z4r1tsu.codereader.actions.SelectChapterAction" text="Select Chapter"
-                description="Select a chapter from the epub file.">
-            <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.ImportEpub"/>
+        <action id="CodeReader.SelectChapter" class="com.z4r1tsu.codereader.actions.SelectChapterAction" text="选择章节"
+                description="从 epub 文件中选择一个章节进行跳转。">
+            <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.OpenFile"/>
         </action>
-        <action id="CodeReader.ViewHistory" class="com.z4r1tsu.codereader.actions.ViewHistoryAction" text="View Reading History"
-                description="View and jump to previous reading sessions.">
+        <action id="CodeReader.ViewHistory" class="com.z4r1tsu.codereader.actions.ViewHistoryAction" text="查看阅读历史"
+                description="查看并跳转到之前的阅读记录。">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.SelectChapter"/>
         </action>
-        <action id="CodeReader.ModifyWordCount" class="com.z4r1tsu.codereader.actions.ModifyWordCountAction" text="Modify Word Count per Page"
-                description="Modify the number of words displayed in the status bar.">
+        <action id="CodeReader.ModifyWordCount" class="com.z4r1tsu.codereader.actions.ModifyWordCountAction" text="修改页字数"
+                description="修改状态栏中单次显示的字数。">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
         </action>
-        <action id="CodeReader.AdjustDisplay" class="com.z4r1tsu.codereader.actions.AdjustDisplayAction" text="Adjust Display Settings"
-                description="Adjust brightness and contrast of the reading interface.">
+        <action id="CodeReader.AdjustDisplay" class="com.z4r1tsu.codereader.actions.AdjustDisplayAction" text="调节显示可见度"
+                description="调节状态栏中阅读文字的可见度以实现隐蔽。">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.ModifyWordCount"/>
         </action>
-        <action id="CodeReader.AutoPage" class="com.z4r1tsu.codereader.actions.AutoPageAction" text="Auto Page Settings"
-                description="Configure auto page turning settings.">
+        <action id="CodeReader.AutoPage" class="com.z4r1tsu.codereader.actions.AutoPageAction" text="自动翻页设置"
+                description="配置自动翻页功能的间隔时间。">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.AdjustDisplay"/>
         </action>
-        <action id="CodeReader.ToggleAutoPage" class="com.z4r1tsu.codereader.actions.ToggleAutoPageAction" text="Toggle Auto Page"
-                description="Starts or stops auto page turning.">
+        <action id="CodeReader.ToggleAutoPage" class="com.z4r1tsu.codereader.actions.ToggleAutoPageAction" text="开启/暂停自动翻页"
+                description="快速开启或暂停自动翻页。">
             <keyboard-shortcut keymap="$default" first-keystroke="alt meta K"/>
         </action>
-        <action id="CodeReader.ClearCache" class="com.z4r1tsu.codereader.actions.ClearCacheAction" text="Clear Cache"
-                description="Clears the cache of the CodeReader plugin.">
+        <action id="CodeReader.ClearCache" class="com.z4r1tsu.codereader.actions.ClearCacheAction" text="清理缓存与历史"
+                description="清理当前书籍缓存并清空阅读历史。">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
         </action>
-        <action id="CodeReader.PrevPage" class="com.z4r1tsu.codereader.actions.PrevPageAction" text="CodeReader Previous Page"
-                description="Go to the previous page.">
+        <action id="CodeReader.PrevPage" class="com.z4r1tsu.codereader.actions.PrevPageAction" text="上一页"
+                description="跳转到上一页。">
             <add-to-group group-id="EditorActions" anchor="after" relative-to-action="EditorPageUp"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt meta LEFT"/>
         </action>
-        <action id="CodeReader.NextPage" class="com.z4r1tsu.codereader.actions.NextPageAction" text="CodeReader Next Page"
-                description="Go to the next page.">
+        <action id="CodeReader.NextPage" class="com.z4r1tsu.codereader.actions.NextPageAction" text="下一页"
+                description="跳转到下一页。">
             <add-to-group group-id="EditorActions" anchor="after" relative-to-action="EditorPageDown"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt meta RIGHT"/>
         </action>
-                <action id="CodeReader.ToggleVisibility" class="com.z4r1tsu.codereader.actions.ToggleVisibilityAction" text="Toggle CodeReader Visibility"
-                description="Shows or hides the CodeReader status bar widget.">
+                <action id="CodeReader.ToggleVisibility" class="com.z4r1tsu.codereader.actions.ToggleVisibilityAction" text="切换状态栏显示/隐藏"
+                description="显示或隐藏状态栏中的 CodeReader 小部件。">
             <keyboard-shortcut keymap="$default" first-keystroke="alt meta H"/>
         </action>
-        <action id="CodeReader.ToggleChapterInfo" class="com.z4r1tsu.codereader.actions.ToggleChapterInfoAction" text="Toggle CodeReader Chapter Info Visibility"
-                description="Shows or hides the CodeReader chapter info in the status bar widget.">
+        <action id="CodeReader.ToggleChapterInfo" class="com.z4r1tsu.codereader.actions.ToggleChapterInfoAction" text="切换章节信息显示"
+                description="在状态栏中显示或隐藏书籍的章节信息和进度。">
             <keyboard-shortcut keymap="$default" first-keystroke="alt meta J"/>
         </action>
     </actions>
