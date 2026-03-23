@@ -31,6 +31,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         public boolean showChapterInfo = false;
         public boolean isVisible = false;
         public int visibility = 100;
+        public float autoPageInterval = 2.0f; // in seconds
 
         public int getWordCount() {
             return wordCount;
@@ -46,6 +47,14 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
         public void setVisibility(int visibility) {
             this.visibility = visibility;
+        }
+
+        public float getAutoPageInterval() {
+            return autoPageInterval;
+        }
+
+        public void setAutoPageInterval(float autoPageInterval) {
+            this.autoPageInterval = autoPageInterval;
         }
     }
 
@@ -65,6 +74,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     private ReaderState readerState = ReaderState.IDLE;
+    private javax.swing.Timer autoPageTimer;
+    private boolean isAutoPageRunning = false;
 
     public CodeReaderService(Project project) {
         this.project = project;
@@ -82,6 +93,56 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     @Override
     public void loadState(@NotNull State state) {
         myState = state;
+        updateAutoPageTimer();
+    }
+
+    public void updateAutoPageTimer() {
+        if (autoPageTimer != null) {
+            autoPageTimer.stop();
+        }
+        if (isAutoPageRunning) {
+            int delay = (int) (myState.autoPageInterval * 1000);
+            autoPageTimer = new javax.swing.Timer(delay, e -> {
+                if (myState.isVisible) {
+                    // Only prevent auto page if cache is cleared or loading.
+                    // Allow auto page for JUST_LOADED, CHAPTER_JUST_JUMPED, and IDLE.
+                    if (readerState != ReaderState.CACHE_CLEARED && readerState != ReaderState.LOADING) {
+                        nextPageInternal();
+                    }
+                }
+            });
+            autoPageTimer.start();
+        }
+    }
+
+    public void startAutoPage() {
+        if (!isAutoPageRunning) {
+            isAutoPageRunning = true;
+            updateAutoPageTimer();
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+        }
+    }
+
+    public void stopAutoPage() {
+        if (isAutoPageRunning) {
+            isAutoPageRunning = false;
+            if (autoPageTimer != null) {
+                autoPageTimer.stop();
+            }
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+        }
+    }
+
+    public void toggleAutoPage() {
+        if (isAutoPageRunning) {
+            stopAutoPage();
+        } else {
+            startAutoPage();
+        }
+    }
+
+    public boolean isAutoPageRunning() {
+        return isAutoPageRunning;
     }
 
     public void loadFile(File file) {
@@ -192,6 +253,11 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void nextPage() {
+        stopAutoPage();
+        nextPageInternal();
+    }
+
+    private void nextPageInternal() {
         if (handleStateAfterPageTurn()) return;
         if (reader == null) return;
 
@@ -213,6 +279,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void prevPage() {
+        stopAutoPage();
         if (handleStateAfterPageTurn()) return;
         if (reader == null) return;
 
@@ -235,6 +302,14 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     private boolean handleStateAfterPageTurn() {
         if (readerState != ReaderState.IDLE) {
+            // 如果是自动翻页触发的（isAutoPageRunning 为 true），且当前是 JUST_LOADED 或 CHAPTER_JUST_JUMPED
+            // 我们允许它自动转换到 IDLE 状态并继续显示内容，而不是直接返回 true 拦截掉这次翻页
+            if (isAutoPageRunning && (readerState == ReaderState.JUST_LOADED || readerState == ReaderState.CHAPTER_JUST_JUMPED)) {
+                readerState = ReaderState.IDLE;
+                project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+                return false; // 继续执行翻页逻辑，从而显示第一页内容
+            }
+            
             readerState = ReaderState.IDLE;
             project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
             return true;
@@ -265,6 +340,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void toggleVisibility() {
+        stopAutoPage();
         myState.isVisible = !myState.isVisible;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }

@@ -96,6 +96,14 @@
                 description="Adjust brightness and contrast of the reading interface.">
             <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.ModifyWordCount"/>
         </action>
+        <action id="CodeReader.AutoPage" class="com.z4r1tsu.codereader.actions.AutoPageAction" text="Auto Page Settings"
+                description="Configure auto page turning settings.">
+            <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.AdjustDisplay"/>
+        </action>
+        <action id="CodeReader.ToggleAutoPage" class="com.z4r1tsu.codereader.actions.ToggleAutoPageAction" text="Toggle Auto Page"
+                description="Starts or stops auto page turning.">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt meta K"/>
+        </action>
         <action id="CodeReader.ClearCache" class="com.z4r1tsu.codereader.actions.ClearCacheAction" text="Clear Cache"
                 description="Clears the cache of the CodeReader plugin.">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
