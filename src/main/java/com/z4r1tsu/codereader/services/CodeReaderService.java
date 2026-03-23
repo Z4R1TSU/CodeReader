@@ -30,6 +30,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         public int wordCount = 30;
         public boolean showChapterInfo = false;
         public boolean isVisible = false;
+        public int visibility = 100;
 
         public int getWordCount() {
             return wordCount;
@@ -37,6 +38,14 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
         public void setWordCount(int wordCount) {
             this.wordCount = wordCount;
+        }
+
+        public int getVisibility() {
+            return visibility;
+        }
+
+        public void setVisibility(int visibility) {
+            this.visibility = visibility;
         }
     }
 

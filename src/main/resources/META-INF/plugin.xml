@@ -92,6 +92,10 @@
                 description="Modify the number of words displayed in the status bar.">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
         </action>
+        <action id="CodeReader.AdjustDisplay" class="com.z4r1tsu.codereader.actions.AdjustDisplayAction" text="Adjust Display Settings"
+                description="Adjust brightness and contrast of the reading interface.">
+            <add-to-group group-id="CodeReader.Menu" anchor="after" relative-to-action="CodeReader.ModifyWordCount"/>
+        </action>
         <action id="CodeReader.ClearCache" class="com.z4r1tsu.codereader.actions.ClearCacheAction" text="Clear Cache"
                 description="Clears the cache of the CodeReader plugin.">
             <add-to-group group-id="CodeReader.Menu" anchor="last"/>
