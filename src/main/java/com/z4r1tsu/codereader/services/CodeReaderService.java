@@ -322,6 +322,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void clearCache() {
+        stopAutoPage();
         reader = null;
         currentFile = "";
         currentPage = 0;
