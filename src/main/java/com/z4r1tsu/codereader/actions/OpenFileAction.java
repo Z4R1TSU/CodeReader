@@ -21,7 +21,7 @@ public class OpenFileAction extends AnAction {
         }
 
         FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
-                .withTitle("Choose a Txt or Epub File")
+                .withTitle("选择 Txt 或 Epub 文件")
                 .withFileFilter(virtualFile -> {
                     String name = virtualFile.getName().toLowerCase();
                     return name.endsWith(".txt") || name.endsWith(".epub");

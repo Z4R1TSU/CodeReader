@@ -31,7 +31,6 @@
         <h3>加载书籍</h3>
         <ul>
             <li><strong>从菜单</strong>: 前往 <code>工具 -> CodeReader</code> 并选择 <code>导入本地文件 (txt/epub)</code>。</li>
-            <li><strong>键盘快捷键</strong>: 使用 <code>control + alt + O</code> 打开文件选择对话框。</li>
         </ul>
 
         <h3>阅读</h3>
@@ -84,7 +83,6 @@
         <action id="CodeReader.OpenFile" class="com.z4r1tsu.codereader.actions.OpenFileAction" text="导入本地文件 (txt/epub)"
                 description="选择一个本地书籍文件导入并阅读。">
             <add-to-group group-id="CodeReader.Menu" anchor="first"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="control alt O"/>
         </action>
         <action id="CodeReader.SelectChapter" class="com.z4r1tsu.codereader.actions.SelectChapterAction" text="选择章节"
                 description="从 epub 文件中选择一个章节进行跳转。">
