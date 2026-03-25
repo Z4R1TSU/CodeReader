@@ -107,7 +107,27 @@ public class EpubReader implements IReader {
         pages.clear();
         try {
             String rawContent = new String(resource.getData(), StandardCharsets.UTF_8);
+            
+            // 1. 过滤 HTML 标签
             String plainText = rawContent.replaceAll("<[^>]*>", "");
+            
+            // 2. 处理常用的 HTML 实体转义字符，提升阅读质感
+            plainText = plainText.replace("&nbsp;", " ")
+                                 .replace("&quot;", "\"")
+                                 .replace("&amp;", "&")
+                                 .replace("&lt;", "<")
+                                 .replace("&gt;", ">")
+                                 .replace("&apos;", "'")
+                                 .replace("&ldquo;", "“")
+                                 .replace("&rdquo;", "”")
+                                 .replace("&lsquo;", "‘")
+                                 .replace("&rsquo;", "’")
+                                 .replace("&hellip;", "…")
+                                 .replace("&mdash;", "—");
+            
+            // 3. 清洗多余的空白字符（可选，让状态栏显示更紧凑）
+            plainText = plainText.replaceAll("\\s+", " ").trim();
+
             if (!plainText.isEmpty()) {
                 for (int i = 0; i < plainText.length(); i += this.wordCount) {
                     int end = Math.min(i + this.wordCount, plainText.length());
