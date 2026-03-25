@@ -8,6 +8,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ui.UIUtil;
 import com.z4r1tsu.codereader.listeners.CodeReaderListener;
 import com.z4r1tsu.codereader.services.CodeReaderService;
+import com.z4r1tsu.codereader.settings.CodeReaderSettingsService;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -109,8 +110,9 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
     private int cachedTargetWidth = -1;
 
     private void updateAppearance() {
-        CodeReaderService service = CodeReaderService.getInstance(project);
-        CodeReaderService.State state = service.getState();
+        CodeReaderSettingsService settings = CodeReaderSettingsService.getInstance();
+        int visibility = settings.getVisibility();
+        int wordCount = settings.getWordCount();
         
         Font font = UIUtil.getLabelFont();
         infoLabel.setFont(font);
@@ -118,8 +120,8 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         
         Color fg = JBColor.namedColor("StatusBar.foreground", UIUtil.getLabelForeground());
         
-        if (state.visibility < 100) {
-            int alpha = (int) (255 * (state.visibility / 100.0f));
+        if (visibility < 100) {
+            int alpha = (int) (255 * (visibility / 100.0f));
             alpha = Math.max(1, Math.min(255, alpha));
             fg = new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), alpha);
         }
@@ -128,11 +130,11 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         textLabel.setForeground(fg);
 
         // 性能优化：仅在 wordCount 发生变化或首次加载时重新计算宽度
-        if (cachedWordCount != state.wordCount) {
+        if (cachedWordCount != wordCount) {
             FontMetrics metrics = textLabel.getFontMetrics(textLabel.getFont());
             int baseCharWidth = metrics.charWidth('中'); 
-            cachedTargetWidth = (state.wordCount * baseCharWidth) + 2;
-            cachedWordCount = state.wordCount;
+            cachedTargetWidth = (wordCount * baseCharWidth) + 2;
+            cachedWordCount = wordCount;
             
             // 确保高度不为 0，优先使用字体测量的高度
             int height = Math.max(metrics.getHeight(), textLabel.getPreferredSize().height);

@@ -2,8 +2,8 @@ package com.z4r1tsu.codereader.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.z4r1tsu.codereader.listeners.CodeReaderListener;
 import com.z4r1tsu.codereader.services.CodeReaderService;
+import com.z4r1tsu.codereader.settings.CodeReaderSettingsService;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -32,7 +32,7 @@ public class AutoPageDialog extends DialogWrapper {
         panel.setPreferredSize(new Dimension(350, 100));
 
         CodeReaderService service = CodeReaderService.getInstance(project);
-        CodeReaderService.State state = service.getState();
+        CodeReaderSettingsService settings = CodeReaderSettingsService.getInstance();
 
         // Enable Panel
         JPanel enablePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -43,12 +43,12 @@ public class AutoPageDialog extends DialogWrapper {
 
         // Interval Panel
         JPanel intervalPanel = new JPanel(new BorderLayout());
-        intervalLabel = new JLabel(String.format("翻页间隔 (%.1f秒): ", state.autoPageInterval));
+        intervalLabel = new JLabel(String.format("翻页间隔 (%.1f秒): ", settings.getAutoPageInterval()));
         intervalLabel.setPreferredSize(new Dimension(130, intervalLabel.getPreferredSize().height));
         intervalPanel.add(intervalLabel, BorderLayout.WEST);
 
         // Slider from 1 to 50 representing 0.1s to 5.0s
-        int initialSliderValue = (int) (state.autoPageInterval * 10);
+        int initialSliderValue = (int) (settings.getAutoPageInterval() * 10);
         intervalSlider = new JSlider(1, 50, initialSliderValue);
         
         // Add labels for 0.1s and 5.0s
@@ -80,14 +80,13 @@ public class AutoPageDialog extends DialogWrapper {
     @Override
     protected void doOKAction() {
         CodeReaderService service = CodeReaderService.getInstance(project);
-        CodeReaderService.State state = service.getState();
+        CodeReaderSettingsService settings = CodeReaderSettingsService.getInstance();
         
-        boolean wasEnabled = service.isAutoPageRunning();
-        float oldInterval = state.autoPageInterval;
+        float oldInterval = settings.getAutoPageInterval();
+        float newInterval = intervalSlider.getValue() / 10.0f;
+        settings.setAutoPageInterval(newInterval);
         
         boolean isEnabled = enableCheckBox.isSelected();
-        state.autoPageInterval = intervalSlider.getValue() / 10.0f;
-        
         if (isEnabled) {
             service.startAutoPage();
         } else {
@@ -95,7 +94,7 @@ public class AutoPageDialog extends DialogWrapper {
         }
         
         // Always update the timer logic if interval changed while running
-        if (isEnabled && oldInterval != state.autoPageInterval) {
+        if (isEnabled && oldInterval != newInterval) {
             service.updateAutoPageTimer();
         }
         

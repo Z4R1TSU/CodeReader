@@ -73,6 +73,7 @@
     ]]></description>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.z4r1tsu.codereader.settings.CodeReaderSettingsService"/>
         <statusBarWidgetFactory id="CodeReaderStatusBar" implementation="com.z4r1tsu.codereader.statusbar.CodeReaderStatusBarWidgetFactory" order="after MemoryIndicator"/>
     </extensions>
 

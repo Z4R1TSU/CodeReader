@@ -1,10 +1,7 @@
 package com.z4r1tsu.codereader.services;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.z4r1tsu.codereader.epub.TOCEntry;
 import com.z4r1tsu.codereader.history.HistoryService;
@@ -13,57 +10,30 @@ import com.z4r1tsu.codereader.listeners.CodeReaderListener;
 import com.z4r1tsu.codereader.reader.EpubReader;
 import com.z4r1tsu.codereader.reader.IReader;
 import com.z4r1tsu.codereader.reader.TxtReader;
+import com.z4r1tsu.codereader.settings.CodeReaderSettingsService;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@State(
-        name = "com.z4r1tsu.codereader.services.CodeReaderService",
-        storages = @Storage("CodeReaderPlugin.xml")
-)
+/**
+ * 核心阅读服务。不再实现 PersistentStateComponent 以减少对项目配置文件的频繁写入。
+ * 显隐状态和章节信息显隐状态仅在内存中保留，确保 IDE 重启后默认为关闭状态。
+ * 全局设置（如字数、可见度）通过 CodeReaderSettingsService 进行 Application 级别的持久化。
+ */
 @Service(Service.Level.PROJECT)
-public final class CodeReaderService implements PersistentStateComponent<CodeReaderService.State>, Disposable {
+public final class CodeReaderService implements Disposable {
 
-    public static class State {
-        public int wordCount = 30;
-        public boolean showChapterInfo = false;
-        public boolean isVisible = false;
-        public int visibility = 100;
-        public float autoPageInterval = 2.0f; // in seconds
-
-        public int getWordCount() {
-            return wordCount;
-        }
-
-        public void setWordCount(int wordCount) {
-            this.wordCount = wordCount;
-        }
-
-        public int getVisibility() {
-            return visibility;
-        }
-
-        public void setVisibility(int visibility) {
-            this.visibility = visibility;
-        }
-
-        public float getAutoPageInterval() {
-            return autoPageInterval;
-        }
-
-        public void setAutoPageInterval(float autoPageInterval) {
-            this.autoPageInterval = autoPageInterval;
-        }
-    }
-
-    private State myState = new State();
     private final Project project;
     private IReader reader;
     private int currentPage = 0;
     private String currentFile = "";
     private int currentChapterIndex = -1;
+    
+    // 内存中的临时状态，不进行持久化，确保 IDE 重启后默认为关闭状态
+    private boolean isVisible = false;
+    private boolean showChapterInfo = false;
 
     private enum ReaderState {
         IDLE,
@@ -85,29 +55,14 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         return project.getService(CodeReaderService.class);
     }
 
-    @Override
-    public State getState() {
-        return myState;
-    }
-
-    @Override
-    public void loadState(@NotNull State state) {
-        myState = state;
-        // 强制 IDE 启动时保持关闭状态，防止持久化配置导致启动即显示
-        myState.isVisible = false;
-        updateAutoPageTimer();
-    }
-
     public void updateAutoPageTimer() {
         if (autoPageTimer != null) {
             autoPageTimer.stop();
         }
         if (isAutoPageRunning) {
-            int delay = (int) (myState.autoPageInterval * 1000);
+            int delay = (int) (CodeReaderSettingsService.getInstance().getAutoPageInterval() * 1000);
             autoPageTimer = new javax.swing.Timer(delay, e -> {
-                if (myState.isVisible) {
-                    // Only prevent auto page if cache is cleared or loading.
-                    // Allow auto page for JUST_LOADED, CHAPTER_JUST_JUMPED, and IDLE.
+                if (isVisible) {
                     if (readerState != ReaderState.CACHE_CLEARED && readerState != ReaderState.LOADING) {
                         nextPageInternal();
                     }
@@ -164,7 +119,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
             return;
         }
 
-        reader.loadFile(filePath, myState.wordCount);
+        reader.loadFile(filePath, CodeReaderSettingsService.getInstance().getWordCount());
         if (reader.isEpub()) {
             reader.loadChapter(0);
         }
@@ -173,7 +128,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         currentPage = 0;
         currentChapterIndex = 0;
         readerState = ReaderState.JUST_LOADED;
-        myState.isVisible = true;
+        isVisible = true;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
 
@@ -221,15 +176,11 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
             int oldChapterIndex = currentChapterIndex;
             int oldPage = currentPage;
             
-            reader.loadFile(currentFile, myState.wordCount);
+            reader.loadFile(currentFile, CodeReaderSettingsService.getInstance().getWordCount());
             if (reader.isEpub()) {
-                currentChapterIndex = oldChapterIndex;
                 reader.loadChapter(currentChapterIndex);
             }
             
-            // Try to maintain roughly the same position
-            // Since wordCount changed, page count changed, but we can't easily stay exact
-            // Let's just stay on the same page for now, or 0 if out of bounds.
             currentPage = Math.min(oldPage, reader.getPageCount() - 1);
             if (currentPage < 0) currentPage = 0;
             
@@ -324,12 +275,10 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
 
     private boolean handleStateAfterPageTurn() {
         if (readerState != ReaderState.IDLE) {
-            // 如果是自动翻页触发的（isAutoPageRunning 为 true），且当前是 JUST_LOADED 或 CHAPTER_JUST_JUMPED
-            // 我们允许它自动转换到 IDLE 状态并继续显示内容，而不是直接返回 true 拦截掉这次翻页
             if (isAutoPageRunning && (readerState == ReaderState.JUST_LOADED || readerState == ReaderState.CHAPTER_JUST_JUMPED)) {
                 readerState = ReaderState.IDLE;
                 project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
-                return false; // 继续执行翻页逻辑，从而显示第一页内容
+                return false;
             }
             
             readerState = ReaderState.IDLE;
@@ -350,7 +299,7 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         currentPage = 0;
         currentChapterIndex = -1;
         readerState = ReaderState.CACHE_CLEARED;
-        myState.isVisible = false;
+        isVisible = false;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
 
         HistoryService historyService = HistoryService.getInstance(project);
@@ -358,22 +307,22 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void toggleChapterInfo() {
-        myState.showChapterInfo = !myState.showChapterInfo;
+        showChapterInfo = !showChapterInfo;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
 
     public void toggleVisibility() {
         stopAutoPage();
-        myState.isVisible = !myState.isVisible;
+        isVisible = !isVisible;
         project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
     }
 
     public boolean isVisible() {
-        return myState.isVisible;
+        return isVisible;
     }
 
     public boolean getShowChapterInfo() {
-        return myState.showChapterInfo;
+        return showChapterInfo;
     }
 
     public int getCurrentChapterIndex() {
