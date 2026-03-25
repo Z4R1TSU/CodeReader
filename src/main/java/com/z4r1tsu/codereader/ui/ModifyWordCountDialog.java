@@ -2,6 +2,7 @@ package com.z4r1tsu.codereader.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.z4r1tsu.codereader.listeners.CodeReaderListener;
 import com.z4r1tsu.codereader.services.CodeReaderService;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,6 +56,8 @@ public class ModifyWordCountDialog extends DialogWrapper {
                 CodeReaderService service = CodeReaderService.getInstance(project);
                 service.getState().setWordCount(currentValue);
                 service.refreshContent();
+                // 刷新完内容后，显式触发外观更新以重新计算宽度
+                project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).appearanceUpdated();
             }
         });
         wordCountPanel.add(wordCountSlider, BorderLayout.CENTER);

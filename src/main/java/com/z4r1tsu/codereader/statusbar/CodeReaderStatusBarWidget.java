@@ -46,10 +46,26 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         // 关键修复：构造时同步一次面板显隐状态，确保启动即生效
         this.panel.setVisible(service.isVisible());
         
-        project.getMessageBus().connect(this).subscribe(CodeReaderListener.TOPIC, () -> {
-            updateContent();
-            panel.setVisible(CodeReaderService.getInstance(project).isVisible());
-            updateAppearance();
+        project.getMessageBus().connect(this).subscribe(CodeReaderListener.TOPIC, new CodeReaderListener() {
+            @Override
+            public void contentUpdated() {
+                updateContent();
+                panel.setVisible(CodeReaderService.getInstance(project).isVisible());
+                updateAppearance();
+            }
+
+            @Override
+            public void appearanceUpdated() {
+                updateAppearance();
+            }
+        });
+
+        // 监听主题切换，确保文字颜色实时更新
+        project.getMessageBus().connect(this).subscribe(LafManagerListener.TOPIC, source -> {
+            SwingUtilities.invokeLater(() -> {
+                cachedWordCount = -1; // 主题切换可能导致字体变化，重置缓存以重新计算宽度
+                updateAppearance();
+            });
         });
 
         MouseAdapter clickListener = new MouseAdapter() {

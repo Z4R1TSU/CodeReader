@@ -58,11 +58,13 @@ public class AdjustDisplayDialog extends DialogWrapper {
         int currentValue = visibilitySlider.getValue();
         state.visibility = currentValue;
         visibilityLabel.setText("可见度 (" + currentValue + "%): ");
-        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).appearanceUpdated();
     }
 
     @Override
     protected void doOKAction() {
+        // 确保在点击确定后，最后刷新一次状态栏，以消除由于模态窗口导致的“变浅”预览效果
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).appearanceUpdated();
         super.doOKAction();
     }
 
@@ -70,7 +72,7 @@ public class AdjustDisplayDialog extends DialogWrapper {
     public void doCancelAction() {
         CodeReaderService.State state = CodeReaderService.getInstance(project).getState();
         state.visibility = originalVisibility;
-        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).appearanceUpdated();
         super.doCancelAction();
     }
 }
