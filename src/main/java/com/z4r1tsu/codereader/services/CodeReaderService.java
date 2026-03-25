@@ -238,6 +238,10 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
         }
     }
 
+    public void updateAppearance() {
+        project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).appearanceUpdated();
+    }
+
     public String getCurrentPageContent() {
         switch (readerState) {
             case CACHE_CLEARED:

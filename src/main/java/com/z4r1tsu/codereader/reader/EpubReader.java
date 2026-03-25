@@ -108,10 +108,15 @@ public class EpubReader implements IReader {
         try {
             String rawContent = new String(resource.getData(), StandardCharsets.UTF_8);
             
-            // 1. 过滤 HTML 标签
-            String plainText = rawContent.replaceAll("<[^>]*>", "");
+            // 1. 处理段落标签，将其转换为明显的换行标识
+            // 将 <p>, <div>, <br> 等块级或换行标签替换为自定义的换行符
+            String processedContent = rawContent.replaceAll("(?i)<p[^>]*>|<div[^>]*>", "\n")
+                                                .replaceAll("(?i)<br\\s*/?>", "\n");
+
+            // 2. 过滤掉剩余的所有 HTML 标签
+            String plainText = processedContent.replaceAll("<[^>]*>", "");
             
-            // 2. 处理常用的 HTML 实体转义字符，提升阅读质感
+            // 3. 处理常用的 HTML 实体转义字符
             plainText = plainText.replace("&nbsp;", " ")
                                  .replace("&quot;", "\"")
                                  .replace("&amp;", "&")
@@ -125,13 +130,21 @@ public class EpubReader implements IReader {
                                  .replace("&hellip;", "…")
                                  .replace("&mdash;", "—");
             
-            // 3. 清洗多余的空白字符（可选，让状态栏显示更紧凑）
-            plainText = plainText.replaceAll("\\s+", " ").trim();
+            // 4. 清洗多余的空白字符，但保留显式的换行（将多个连续换行缩减为两个，以保持分段感）
+            plainText = plainText.replaceAll("[ \t\f\r]+", " ") // 合并横向空白
+                                 .replaceAll("\n\\s*\n", "\n\n") // 合并多个空行为双换行
+                                 .trim();
 
             if (!plainText.isEmpty()) {
-                for (int i = 0; i < plainText.length(); i += this.wordCount) {
-                    int end = Math.min(i + this.wordCount, plainText.length());
-                    pages.add(plainText.substring(i, end));
+                // 为了在单行显示的状态栏体现分段感，我们将换行符替换为一段较长的空格（如4个空格）
+                String displayableText = plainText.replace("\n\n", "    ").replace("\n", "    ");
+                
+                for (int i = 0; i < displayableText.length(); i += this.wordCount) {
+                    int end = Math.min(i + this.wordCount, displayableText.length());
+                    String pageContent = displayableText.substring(i, end);
+                    
+                    // 如果刚好翻页，通过 trim() 忽略掉页首页尾的多余空格
+                    pages.add(pageContent.trim());
                 }
             } else {
                 pages.add(" ");

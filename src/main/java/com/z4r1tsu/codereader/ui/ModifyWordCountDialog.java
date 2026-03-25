@@ -57,7 +57,7 @@ public class ModifyWordCountDialog extends DialogWrapper {
                 service.getState().setWordCount(currentValue);
                 service.refreshContent();
                 // 刷新完内容后，显式触发外观更新以重新计算宽度
-                project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).appearanceUpdated();
+                service.updateAppearance();
             }
         });
         wordCountPanel.add(wordCountSlider, BorderLayout.CENTER);
