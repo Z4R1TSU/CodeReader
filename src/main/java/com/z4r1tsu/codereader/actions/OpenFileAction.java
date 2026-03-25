@@ -20,17 +20,25 @@ public class OpenFileAction extends AnAction {
             return;
         }
 
-        FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
-                .withTitle("选择 Txt 或 Epub 文件");
-
-        // 使用 withFileFilter 并在内部进行更严格的过滤，以确保在 GoLand 25.3 中能正确置灰
-        descriptor.withFileFilter(virtualFile -> {
-            if (virtualFile.isDirectory()) {
+        FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false) {
+            @Override
+            public boolean isFileVisible(VirtualFile file, boolean showHiddenFiles) {
+                // 如果是目录，必须可见以便导航
+                if (file.isDirectory()) return true;
+                
+                // 仿照 "Install Plugin from Disk" 的实现：
+                // 让所有文件在列表中可见，这样不支持的文件就会被系统置灰而不是直接隐藏
                 return true;
             }
-            String name = virtualFile.getName().toLowerCase();
-            return name.endsWith(".txt") || name.endsWith(".epub");
-        });
+
+            @Override
+            public boolean isFileSelectable(VirtualFile file) {
+                // 只有符合后缀的文件才允许被选中（点击 OK）
+                if (file == null || file.isDirectory()) return false;
+                String name = file.getName().toLowerCase();
+                return name.endsWith(".txt") || name.endsWith(".epub");
+            }
+        }.withTitle("选择 Txt 或 Epub 文件");
 
         FileChooser.chooseFile(descriptor, project, null, virtualFile -> {
             if (virtualFile != null) {
