@@ -1,5 +1,6 @@
 package com.z4r1tsu.codereader.statusbar;
 
+import com.intellij.ide.ui.LafManagerListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.CustomStatusBarWidget;
 import com.intellij.openapi.wm.StatusBar;
@@ -99,23 +100,16 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         infoLabel.setFont(font);
         textLabel.setFont(font);
         
-        // 显式解析颜色，避免 JBColor 动态特性导致在高版本 IDE 中出现解析异常
         Color fg = JBColor.namedColor("StatusBar.foreground", UIUtil.getLabelForeground());
-        if (fg == null) fg = JBColor.foreground();
         
-        // 确保使用不透明的原始 RGB 基础
-        int r = fg.getRed();
-        int g = fg.getGreen();
-        int bl = fg.getBlue();
+        if (state.visibility < 100) {
+            int alpha = (int) (255 * (state.visibility / 100.0f));
+            alpha = Math.max(1, Math.min(255, alpha));
+            fg = new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), alpha);
+        }
         
-        // 重新计算透明度，限制最小值为 1，避免完全不可见
-        int visibility = state.visibility;
-        int alpha = (int) (255 * (visibility / 100.0f));
-        alpha = Math.max(1, Math.min(255, alpha)); 
-        
-        Color textColor = new Color(r, g, bl, alpha);
-        infoLabel.setForeground(textColor);
-        textLabel.setForeground(textColor);
+        infoLabel.setForeground(fg);
+        textLabel.setForeground(fg);
 
         // 性能优化：仅在 wordCount 发生变化或首次加载时重新计算宽度
         if (cachedWordCount != state.wordCount) {
