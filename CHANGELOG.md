@@ -4,22 +4,24 @@
 
 ## [Unreleased]
 
-## [1.3.0]
+## [1.5.0]
 ### Added
-- **Word Count Slider**: Replaced the input dialog for word count adjustment with a slider, featuring a range of 1-100 and real-time preview functionality.
+- **Smart Paragraph Handling**: Enhanced EPUB reading experience with paragraph-aware spacing. Paragraphs are now visually separated by a 4-space gap for better readability in the status bar.
+- **Edge Space Trimming**: Automatically trims leading and trailing spaces when word count splits happen at paragraph boundaries, ensuring no display space is wasted.
 
+### Optimized
+- **Ultra-Performance TXT Engine**: Refactored the TXT reader to use a file-pointer based lazy loading strategy. This allows for near-zero memory footprint and instantaneous loading of multi-gigabyte files.
+- **Enhanced EPUB Content Cleaning**: Improved HTML entity decoding (e.g., &ldquo;, &mdash;) and whitespace normalization for a much cleaner reading interface.
+- **Fine-grained UI Refresh**: Decoupled content updates from appearance updates in the status bar widget, significantly reducing CPU usage during auto-paging.
+
+## [1.4.0]
 ### Fixed
-- **Performance Lag**: Implemented a debounced refresh mechanism for the word count slider, ensuring smooth dragging without UI stuttering.
-- **Text Visibility in GoLand**: Resolved a critical issue in newer IDE versions (like GoLand 2025.3) where text could become invisible due to incorrect color or height calculation.
-- **Chapter Info Jitter**: Eliminated the status bar jitter caused by changing digit widths in chapter progress by implementing a fixed-width info label.
-- **Startup Visibility**: Fixed a bug where the plugin would incorrectly show on IDE startup if it was left open in the previous session.
-- **File Chooser Compatibility**: Improved the file filter for importing books to work correctly on newer JetBrains platforms.
+- **Visual Jitter Fixes**: Completely eliminated status bar flickering and jumping by implementing fixed-width containers for both chapter info and main text.
+- **Text Visibility**: Resolved rendering issues in high-version IDEs (like GoLand 2025.3) by adopting a more robust native color blending strategy.
+- **Startup Logic**: Ensured the plugin always stays hidden upon IDE startup for maximum privacy.
+- **Native File Chooser**: Optimized the file selection dialog to correctly grey out unsupported file formats on all JetBrains platforms.
 
-### Changed
-- **Optimized Color Logic**: Improved the visibility adjustment algorithm to use native alpha blending for better compatibility with various IDE themes.
-- **UI Refinement**: Updated slider labels to use a more natural 0-100 range with regular tick marks.
-
-## [1.2.0]
+## [1.3.0]
 ### Fixed
 - **Content Truncation**: Resolved the issue where the end of a page could be truncated with `...` when the combined length of chapter info and text exceeded the display area, ensuring a continuous reading experience without missing words.
 - **Layout Jumping**: Fixed the frequent expansion and contraction of the status bar when turning pages by implementing a fixed-width display area for the reading text.
