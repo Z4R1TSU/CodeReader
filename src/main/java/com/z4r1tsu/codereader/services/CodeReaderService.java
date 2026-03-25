@@ -215,8 +215,24 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     }
 
     public void refreshContent() {
-        if (currentFile != null && !currentFile.isEmpty()) {
-            loadFile(new File(currentFile));
+        if (currentFile != null && !currentFile.isEmpty() && reader != null) {
+            int oldChapterIndex = currentChapterIndex;
+            int oldPage = currentPage;
+            
+            reader.loadFile(currentFile, myState.wordCount);
+            if (reader.isEpub()) {
+                currentChapterIndex = oldChapterIndex;
+                reader.loadChapter(currentChapterIndex);
+            }
+            
+            // Try to maintain roughly the same position
+            // Since wordCount changed, page count changed, but we can't easily stay exact
+            // Let's just stay on the same page for now, or 0 if out of bounds.
+            currentPage = Math.min(oldPage, reader.getPageCount() - 1);
+            if (currentPage < 0) currentPage = 0;
+            
+            readerState = ReaderState.IDLE;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
         }
     }
 
