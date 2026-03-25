@@ -38,8 +38,12 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         this.panel.add(infoLabel);
         this.panel.add(textLabel);
         
+        CodeReaderService service = CodeReaderService.getInstance(project);
         updateContent();
         updateAppearance();
+        
+        // 关键修复：构造时同步一次面板显隐状态，确保启动即生效
+        this.panel.setVisible(service.isVisible());
         
         project.getMessageBus().connect(this).subscribe(CodeReaderListener.TOPIC, () -> {
             updateContent();
@@ -95,21 +99,21 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         infoLabel.setFont(font);
         textLabel.setFont(font);
         
-        Color fg = UIUtil.getLabelForeground();
-        Color bg = JBColor.namedColor("StatusBar.background", UIUtil.getPanelBackground());
+        // 显式解析颜色，避免 JBColor 动态特性导致在高版本 IDE 中出现解析异常
+        Color fg = JBColor.namedColor("StatusBar.foreground", UIUtil.getLabelForeground());
+        if (fg == null) fg = JBColor.foreground();
         
+        // 确保使用不透明的原始 RGB 基础
+        int r = fg.getRed();
+        int g = fg.getGreen();
+        int bl = fg.getBlue();
+        
+        // 重新计算透明度，限制最小值为 1，避免完全不可见
         int visibility = state.visibility;
-        float factor = visibility / 100.0f;
+        int alpha = (int) (255 * (visibility / 100.0f));
+        alpha = Math.max(1, Math.min(255, alpha)); 
         
-        int r = (int) (bg.getRed() + (fg.getRed() - bg.getRed()) * factor);
-        int g = (int) (bg.getGreen() + (fg.getGreen() - bg.getGreen()) * factor);
-        int bl = (int) (bg.getBlue() + (fg.getBlue() - bg.getBlue()) * factor);
-        
-        r = Math.max(0, Math.min(255, r));
-        g = Math.max(0, Math.min(255, g));
-        bl = Math.max(0, Math.min(255, bl));
-        
-        Color textColor = new Color(r, g, bl, fg.getAlpha());
+        Color textColor = new Color(r, g, bl, alpha);
         infoLabel.setForeground(textColor);
         textLabel.setForeground(textColor);
 
@@ -120,7 +124,11 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
             cachedTargetWidth = (state.wordCount * baseCharWidth) + 2;
             cachedWordCount = state.wordCount;
             
-            Dimension fixedSize = new Dimension(cachedTargetWidth, textLabel.getPreferredSize().height);
+            // 确保高度不为 0，优先使用字体测量的高度
+            int height = Math.max(metrics.getHeight(), textLabel.getPreferredSize().height);
+            if (height <= 0) height = 20; // 最后的保底高度
+            
+            Dimension fixedSize = new Dimension(cachedTargetWidth, height);
             textLabel.setPreferredSize(fixedSize);
             textLabel.setMinimumSize(fixedSize);
             textLabel.setMaximumSize(fixedSize);

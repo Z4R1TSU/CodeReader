@@ -93,6 +93,8 @@ public final class CodeReaderService implements PersistentStateComponent<CodeRea
     @Override
     public void loadState(@NotNull State state) {
         myState = state;
+        // 强制 IDE 启动时保持关闭状态，防止持久化配置导致启动即显示
+        myState.isVisible = false;
         updateAutoPageTimer();
     }
 

@@ -21,11 +21,16 @@ public class OpenFileAction extends AnAction {
         }
 
         FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
-                .withTitle("选择 Txt 或 Epub 文件")
-                .withFileFilter(virtualFile -> {
-                    String name = virtualFile.getName().toLowerCase();
-                    return name.endsWith(".txt") || name.endsWith(".epub");
-                });
+                .withTitle("选择 Txt 或 Epub 文件");
+
+        // 使用 withFileFilter 并在内部进行更严格的过滤，以确保在 GoLand 25.3 中能正确置灰
+        descriptor.withFileFilter(virtualFile -> {
+            if (virtualFile.isDirectory()) {
+                return true;
+            }
+            String name = virtualFile.getName().toLowerCase();
+            return name.endsWith(".txt") || name.endsWith(".epub");
+        });
 
         FileChooser.chooseFile(descriptor, project, null, virtualFile -> {
             if (virtualFile != null) {
