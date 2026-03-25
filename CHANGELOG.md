@@ -4,6 +4,21 @@
 
 ## [Unreleased]
 
+## [1.3.0]
+### Added
+- **Word Count Slider**: Replaced the input dialog for word count adjustment with a slider, featuring a range of 1-100 and real-time preview functionality.
+
+### Fixed
+- **Performance Lag**: Implemented a debounced refresh mechanism for the word count slider, ensuring smooth dragging without UI stuttering.
+- **Text Visibility in GoLand**: Resolved a critical issue in newer IDE versions (like GoLand 2025.3) where text could become invisible due to incorrect color or height calculation.
+- **Chapter Info Jitter**: Eliminated the status bar jitter caused by changing digit widths in chapter progress by implementing a fixed-width info label.
+- **Startup Visibility**: Fixed a bug where the plugin would incorrectly show on IDE startup if it was left open in the previous session.
+- **File Chooser Compatibility**: Improved the file filter for importing books to work correctly on newer JetBrains platforms.
+
+### Changed
+- **Optimized Color Logic**: Improved the visibility adjustment algorithm to use native alpha blending for better compatibility with various IDE themes.
+- **UI Refinement**: Updated slider labels to use a more natural 0-100 range with regular tick marks.
+
 ## [1.2.0]
 ### Fixed
 - **Content Truncation**: Resolved the issue where the end of a page could be truncated with `...` when the combined length of chapter info and text exceeded the display area, ensuring a continuous reading experience without missing words.
