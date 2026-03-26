@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [1.6.0]
+### Added
+- **Zone-based Click Navigation**: Introduced a revolutionary way to navigate chapters directly from the status bar.
+  - Click the **left 10%** area to jump to the previous chapter.
+  - Click the **right 10%** area to jump to the next chapter.
+  - Click the **middle 80%** area to toggle visibility.
+- **Improved Persistence Architecture**: Completely refactored the persistence logic. Global settings (word count, visibility, intervals) are now stored at the Application level, while project-specific states are kept in memory to prevent `Failed to save settings` errors and unnecessary project file modifications.
+
+### Optimized
+- **Startup Privacy**: The plugin now strictly defaults to hidden on IDE startup, ensuring maximum privacy.
+- **Refined Event Bus**: Optimized the internal listener system to use service-scoped updates, further reducing UI thread overhead.
+
 ## [1.5.0]
 ### Added
 - **Smart Paragraph Handling**: Enhanced EPUB reading experience with paragraph-aware spacing. Paragraphs are now visually separated by a 4-space gap for better readability in the status bar.
