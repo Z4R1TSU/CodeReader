@@ -1,6 +1,10 @@
 # CodeReader 插件
 
 <!-- Plugin description -->
+CodeReader is a JetBrains IDE plugin designed for developers to read local `.txt` and `.epub` novels discreetly directly within the IDE's status bar. It provides a seamless way to switch between coding and reading without leaving your development environment.
+
+---
+
 CodeReader 是一款纯粹的、用于程序员上班摸鱼的、支持本地文件上传的、JetBrains IDE 小说阅读插件。
 
 欢迎使用 CodeReader 插件！本插件可让您直接在 IDE 的状态栏中阅读 `.txt` 和 `.epub` 格式的书籍，提供一种在编码和阅读之间无缝切换的方式，而无需离开您的开发环境。
