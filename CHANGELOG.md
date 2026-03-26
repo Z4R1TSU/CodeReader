@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [1.7.0]
+### Fixed
+- **EPUB Page Count Accuracy**: Fixed an issue where the current page could exceed the total chapter page count by aligning the page calculation logic with the actual rendering logic.
+- **Improved File Chooser**: Enhanced the file selection dialog to correctly gray out unsupported file formats, making it clearer which files can be imported.
+- **Marketplace Compliance**: Updated the plugin description to comply with JetBrains Marketplace requirements (Latin character start and minimum length).
+
 ## [1.6.0]
 ### Added
 - **Zone-based Click Navigation**: Introduced a revolutionary way to navigate chapters directly from the status bar.
