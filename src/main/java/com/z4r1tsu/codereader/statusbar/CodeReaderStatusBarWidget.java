@@ -73,7 +73,23 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    CodeReaderService.getInstance(project).toggleVisibility();
+                    int width = panel.getWidth();
+                    int x = e.getX();
+                    
+                    // 区域划分逻辑：
+                    // 左侧 10%：上一章
+                    // 右侧 10%：下一章
+                    // 中间 80%：隐藏面板
+                    double ratio = (double) x / width;
+                    
+                    CodeReaderService service = CodeReaderService.getInstance(project);
+                    if (ratio < 0.1) {
+                        service.prevChapter();
+                    } else if (ratio > 0.9) {
+                        service.nextChapter();
+                    } else {
+                        service.toggleVisibility();
+                    }
                 }
             }
         };

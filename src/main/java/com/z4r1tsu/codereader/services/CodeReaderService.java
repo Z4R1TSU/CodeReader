@@ -171,6 +171,28 @@ public final class CodeReaderService implements Disposable {
         }
     }
 
+    public void prevChapter() {
+        if (reader != null && reader.isEpub() && currentChapterIndex > 0) {
+            stopAutoPage();
+            currentChapterIndex--;
+            reader.loadChapter(currentChapterIndex);
+            currentPage = 0;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            saveCurrentStateToHistory();
+        }
+    }
+
+    public void nextChapter() {
+        if (reader != null && reader.isEpub() && currentChapterIndex < reader.getToc().size() - 1) {
+            stopAutoPage();
+            currentChapterIndex++;
+            reader.loadChapter(currentChapterIndex);
+            currentPage = 0;
+            project.getMessageBus().syncPublisher(CodeReaderListener.TOPIC).contentUpdated();
+            saveCurrentStateToHistory();
+        }
+    }
+
     public void refreshContent() {
         if (currentFile != null && !currentFile.isEmpty() && reader != null) {
             int oldChapterIndex = currentChapterIndex;
