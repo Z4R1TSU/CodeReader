@@ -22,6 +22,8 @@ public class EpubReader implements IReader {
     @Override
     public void loadFile(String filePath, int wordCount) {
         this.wordCount = wordCount;
+        this.toc.clear();
+        this.totalPageCountCache = null;
         try (FileInputStream fileInputStream = new FileInputStream(filePath)) {
             this.book = (new nl.siegmann.epublib.epub.EpubReader()).readEpub(fileInputStream);
             if (book != null) {
