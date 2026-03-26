@@ -26,8 +26,7 @@ public class OpenFileAction extends AnAction {
                 // 如果是目录，必须可见以便导航
                 if (file.isDirectory()) return true;
                 
-                // 仿照 "Install Plugin from Disk" 的实现：
-                // 让所有文件在列表中可见，这样不支持的文件就会被系统置灰而不是直接隐藏
+                // 让所有文件在列表中可见，这样不支持的文件就会被系统置灰（不可选中）
                 return true;
             }
 
@@ -38,7 +37,10 @@ public class OpenFileAction extends AnAction {
                 String name = file.getName().toLowerCase();
                 return name.endsWith(".txt") || name.endsWith(".epub");
             }
-        }.withTitle("选择 Txt 或 Epub 文件");
+        }.withFileFilter(file -> {
+            String name = file.getName().toLowerCase();
+            return name.endsWith(".txt") || name.endsWith(".epub");
+        }).withTitle("选择 Txt 或 Epub 文件");
 
         FileChooser.chooseFile(descriptor, project, null, virtualFile -> {
             if (virtualFile != null) {
