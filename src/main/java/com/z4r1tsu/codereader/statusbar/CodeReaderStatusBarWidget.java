@@ -83,6 +83,12 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
                     double ratio = (double) x / width;
                     
                     CodeReaderService service = CodeReaderService.getInstance(project);
+                    if (!service.isVisible()) {
+                        // 如果当前是隐藏状态，任何点击区域都应该作为显示/唤醒操作
+                        service.toggleVisibility();
+                        return;
+                    }
+                    
                     if (ratio < 0.1) {
                         service.prevChapter();
                     } else if (ratio > 0.9) {
@@ -119,7 +125,7 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
             infoLabel.setVisible(false);
         }
         
-        if (service.isCurrentPageTitle()) {
+        if (service.isCurrentPageTitle() || service.isSystemMessage() || service.getCurrentPageContent().equals("No file loaded.")) {
             textLabel.setHorizontalAlignment(SwingConstants.CENTER);
         } else {
             textLabel.setHorizontalAlignment(SwingConstants.RIGHT);

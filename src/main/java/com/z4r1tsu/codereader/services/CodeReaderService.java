@@ -172,6 +172,7 @@ public final class CodeReaderService implements Disposable {
     }
 
     public void prevChapter() {
+        if (!isVisible) return;
         if (reader != null && reader.isEpub() && currentChapterIndex > 0) {
             stopAutoPage();
             currentChapterIndex--;
@@ -183,6 +184,7 @@ public final class CodeReaderService implements Disposable {
     }
 
     public void nextChapter() {
+        if (!isVisible) return;
         if (reader != null && reader.isEpub() && currentChapterIndex < reader.getToc().size() - 1) {
             stopAutoPage();
             currentChapterIndex++;
@@ -241,6 +243,10 @@ public final class CodeReaderService implements Disposable {
         return false;
     }
 
+    public boolean isSystemMessage() {
+        return readerState != ReaderState.IDLE;
+    }
+
     private String getActualCurrentPageContent() {
         if (reader == null) {
             return "No file loaded.";
@@ -255,6 +261,7 @@ public final class CodeReaderService implements Disposable {
     }
 
     public void nextPage() {
+        if (!isVisible) return;
         stopAutoPage();
         nextPageInternal();
     }
@@ -281,6 +288,7 @@ public final class CodeReaderService implements Disposable {
     }
 
     public void prevPage() {
+        if (!isVisible) return;
         stopAutoPage();
         if (handleStateAfterPageTurn()) return;
         if (reader == null) return;
