@@ -1,9 +1,11 @@
 package com.z4r1tsu.codereader.epub;
 
+import com.z4r1tsu.codereader.utils.TextProcessUtil;
 import nl.siegmann.epublib.domain.Resource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class TOCEntry {
     private final String title;
@@ -31,37 +33,26 @@ public class TOCEntry {
             try {
                 String rawContent = new String(resource.getData(), StandardCharsets.UTF_8);
                 
-                String processedContent = rawContent.replaceAll("(?i)<p[^>]*>|<div[^>]*>", "\n")
-                                                    .replaceAll("(?i)<br\\s*/?>", "\n");
-
-                String plainText = processedContent.replaceAll("<[^>]*>", "");
+                // 1. 获取干净的纯文本
+                String plainText = TextProcessUtil.cleanHtmlContent(rawContent);
                 
-                plainText = plainText.replace("&nbsp;", " ")
-                                     .replace("&quot;", "\"")
-                                     .replace("&amp;", "&")
-                                     .replace("&lt;", "<")
-                                     .replace("&gt;", ">")
-                                     .replace("&apos;", "'")
-                                     .replace("&ldquo;", "“")
-                                     .replace("&rdquo;", "”")
-                                     .replace("&lsquo;", "‘")
-                                     .replace("&rsquo;", "’")
-                                     .replace("&hellip;", "…")
-                                     .replace("&mdash;", "—");
-                
-                plainText = plainText.replaceAll("[ \t\f\r]+", " ")
-                                     .replaceAll("\n\\s*\n", "\n\n")
-                                     .trim();
-
-                if (!plainText.isEmpty()) {
-                    String displayableText = plainText.replace("\n\n", "    ").replace("\n", "    ");
-                    this.pageCount = Math.max(1, (int) Math.ceil((double) displayableText.length() / wordCount));
-                } else {
-                    this.pageCount = 1;
+                // 2. 去除正文开头的重复章节名
+                if (title != null && !title.trim().isEmpty()) {
+                    plainText = TextProcessUtil.removeDuplicateTitle(plainText, title.trim());
                 }
+                
+                // 3. 计算正文页数
+                List<String> contentPages = TextProcessUtil.paginateText(plainText, wordCount);
+                int contentPagesCount = contentPages.size();
+                
+                // 4. 计算章节标题页数
+                List<String> titlePages = TextProcessUtil.generateTitlePages(title, wordCount);
+                int titlePagesCount = titlePages.size();
+                
+                this.pageCount = titlePagesCount + contentPagesCount;
             } catch (IOException e) {
                 e.printStackTrace();
-                this.pageCount = 0;
+                this.pageCount = 1; // At least show the title page even on error
             }
         }
         return pageCount;

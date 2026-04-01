@@ -35,7 +35,7 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         this.infoLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
         
         this.textLabel = new JLabel("");
-        this.textLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        this.textLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         
         this.panel.add(infoLabel);
         this.panel.add(textLabel);
@@ -117,6 +117,12 @@ public class CodeReaderStatusBarWidget implements CustomStatusBarWidget {
         } else {
             infoLabel.setText("");
             infoLabel.setVisible(false);
+        }
+        
+        if (service.isCurrentPageTitle()) {
+            textLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        } else {
+            textLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         }
         
         textLabel.setText(service.getCurrentPageContent());

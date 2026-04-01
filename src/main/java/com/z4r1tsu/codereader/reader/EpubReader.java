@@ -1,6 +1,7 @@
 package com.z4r1tsu.codereader.reader;
 
 import com.z4r1tsu.codereader.epub.TOCEntry;
+import com.z4r1tsu.codereader.utils.TextProcessUtil;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.TOCReference;
@@ -18,6 +19,7 @@ public class EpubReader implements IReader {
     private List<String> pages = new ArrayList<>();
     private int wordCount;
     private Integer totalPageCountCache = null;
+    private int currentTitlePageCount = 0;
 
     @Override
     public void loadFile(String filePath, int wordCount) {
@@ -60,7 +62,8 @@ public class EpubReader implements IReader {
     @Override
     public void loadChapter(int chapterIndex) {
         if (chapterIndex >= 0 && chapterIndex < toc.size()) {
-            loadResource(toc.get(chapterIndex).getResource());
+            TOCEntry entry = toc.get(chapterIndex);
+            loadResource(entry.getResource(), entry.getTitle());
         }
     }
 
@@ -88,6 +91,11 @@ public class EpubReader implements IReader {
         return toc.get(chapterIndex).getTitle();
     }
 
+    @Override
+    public boolean isTitlePage(int page) {
+        return page >= 0 && page < currentTitlePageCount;
+    }
+
     private void extractToc(List<TOCReference> tocReferences, int depth) {
         if (tocReferences == null) {
             return;
@@ -102,54 +110,35 @@ public class EpubReader implements IReader {
         }
     }
 
-    private void loadResource(Resource resource) {
+    private void loadResource(Resource resource, String chapterTitle) {
         if (resource == null) {
             return;
         }
         pages.clear();
+        
+        // Add chapter title pages
+        List<String> titlePages = TextProcessUtil.generateTitlePages(chapterTitle, this.wordCount);
+        this.currentTitlePageCount = titlePages.size();
+        pages.addAll(titlePages);
+
         try {
             String rawContent = new String(resource.getData(), StandardCharsets.UTF_8);
             
-            // 1. 处理段落标签，将其转换为明显的换行标识
-            // 将 <p>, <div>, <br> 等块级或换行标签替换为自定义的换行符
-            String processedContent = rawContent.replaceAll("(?i)<p[^>]*>|<div[^>]*>", "\n")
-                                                .replaceAll("(?i)<br\\s*/?>", "\n");
-
-            // 2. 过滤掉剩余的所有 HTML 标签
-            String plainText = processedContent.replaceAll("<[^>]*>", "");
+            // 1. 获取干净的纯文本
+            String plainText = TextProcessUtil.cleanHtmlContent(rawContent);
             
-            // 3. 处理常用的 HTML 实体转义字符
-            plainText = plainText.replace("&nbsp;", " ")
-                                 .replace("&quot;", "\"")
-                                 .replace("&amp;", "&")
-                                 .replace("&lt;", "<")
-                                 .replace("&gt;", ">")
-                                 .replace("&apos;", "'")
-                                 .replace("&ldquo;", "“")
-                                 .replace("&rdquo;", "”")
-                                 .replace("&lsquo;", "‘")
-                                 .replace("&rsquo;", "’")
-                                 .replace("&hellip;", "…")
-                                 .replace("&mdash;", "—");
+            // 2. 去除正文开头的重复章节名
+            if (chapterTitle != null && !chapterTitle.trim().isEmpty()) {
+                plainText = TextProcessUtil.removeDuplicateTitle(plainText, chapterTitle.trim());
+            }
             
-            // 4. 清洗多余的空白字符，但保留显式的换行（将多个连续换行缩减为两个，以保持分段感）
-            plainText = plainText.replaceAll("[ \t\f\r]+", " ") // 合并横向空白
-                                 .replaceAll("\n\\s*\n", "\n\n") // 合并多个空行为双换行
-                                 .trim();
-
-            if (!plainText.isEmpty()) {
-                // 为了在单行显示的状态栏体现分段感，我们将换行符替换为一段较长的空格（如4个空格）
-                String displayableText = plainText.replace("\n\n", "    ").replace("\n", "    ");
-                
-                for (int i = 0; i < displayableText.length(); i += this.wordCount) {
-                    int end = Math.min(i + this.wordCount, displayableText.length());
-                    String pageContent = displayableText.substring(i, end);
-                    
-                    // 如果刚好翻页，通过 trim() 忽略掉页首页尾的多余空格
-                    pages.add(pageContent.trim());
-                }
-            } else {
+            // 3. 分页正文
+            List<String> contentPages = TextProcessUtil.paginateText(plainText, this.wordCount);
+            
+            if (contentPages.isEmpty() && titlePages.isEmpty()) {
                 pages.add(" ");
+            } else {
+                pages.addAll(contentPages);
             }
         } catch (IOException e) {
             e.printStackTrace();

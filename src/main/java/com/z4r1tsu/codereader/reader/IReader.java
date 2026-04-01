@@ -22,4 +22,6 @@ public interface IReader {
     int getChapterPageCount(int chapterIndex);
 
     String getChapterTitle(int chapterIndex);
+
+    boolean isTitlePage(int page);
 }

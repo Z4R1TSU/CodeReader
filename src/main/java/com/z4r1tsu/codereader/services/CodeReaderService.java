@@ -234,6 +234,13 @@ public final class CodeReaderService implements Disposable {
         }
     }
 
+    public boolean isCurrentPageTitle() {
+        if (readerState == ReaderState.IDLE && reader != null) {
+            return reader.isTitlePage(currentPage);
+        }
+        return false;
+    }
+
     private String getActualCurrentPageContent() {
         if (reader == null) {
             return "No file loaded.";

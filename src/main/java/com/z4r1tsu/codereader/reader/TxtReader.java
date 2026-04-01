@@ -150,4 +150,9 @@ public class TxtReader implements IReader {
     public String getChapterTitle(int chapterIndex) {
         return "";
     }
+
+    @Override
+    public boolean isTitlePage(int page) {
+        return false;
+    }
 }
