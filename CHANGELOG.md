@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [1.8.0]
+### Added
+- **Centralized Status Messages**: System status messages (such as "Loading...", "Jump successful", "Cache cleared") and EPUB chapter titles are now absolutely centered in the reading area, providing a clearer distinction between system feedback and actual book content.
+- **Enhanced Stealth Mode**: Paging actions (both manual shortcuts and mouse clicks) are now strictly disabled when the reading panel is hidden. This prevents accidental progress changes while in stealth mode.
+- **Auto-Page State Restoration**: The auto-page timer is now smartly paused when hiding the reader and seamlessly resumed when unhidden, saving system resources and improving user experience.
+- **Smart EPUB Title Deduplication**: Introduced a robust regex-based deduplication logic to strip out duplicate chapter titles that are hardcoded at the beginning of the EPUB HTML content.
+- **Long Chapter Title Support**: Extremely long chapter titles are no longer truncated with `...`. They are now smoothly paginated just like regular content.
+
 ## [1.7.0]
 ### Fixed
 - **EPUB Page Count Accuracy**: Fixed an issue where the current page could exceed the total chapter page count by aligning the page calculation logic with the actual rendering logic.
